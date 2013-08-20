@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+	<persistence-unit name="HumanTaskManager">
+		<class>com.htm.entities.jpa.Workitemtaskview</class>
+		<class>com.htm.entities.jpa.UsersGroupsPK</class>
+		<class>com.htm.entities.jpa.UsersGroups</class>
+		<class>com.htm.entities.jpa.User</class>
+		<class>com.htm.entities.jpa.Presentationinformation</class>
+		<class>com.htm.entities.jpa.Peoplequeryargument</class>
+		<class>com.htm.entities.jpa.Peoplequery</class>
+		<class>com.htm.entities.jpa.LpgArgumentdef</class>
+		<class>com.htm.entities.jpa.Logicalpeoplegroupdef</class>
+		<class>com.htm.entities.jpa.Literal</class>
+		<class>com.htm.entities.jpa.Humantaskmodel</class>
+		<class>com.htm.entities.jpa.Humantaskinstance</class>
+		<class>com.htm.entities.jpa.Group</class>
+		<class>com.htm.entities.jpa.Workitem</class>
+		<class>com.htm.entities.jpa.Callbackcorrelationproperty</class>
+		<class>com.htm.entities.jpa.Attachment</class>
+		<class>com.htm.entities.jpa.Assigneduser</class>
+		<properties>
+			<property name="eclipselink.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+			<property name="eclipselink.jdbc.url" value="jdbc:derby:db/htmDB"/>
+			<!-- user has to be set to 'app' otherwise following exception is raised Schema 'USER' does not exist -->
+			<property name="eclipselink.jdbc.user" value="app"/> 
+			<property name="eclipselink.jdbc.password" value=""/>
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="StructureDataManager">
+		<class>com.shtm.structureClasses.StructureData</class>
+		<properties>
+			<property name="eclipselink.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+			<property name="eclipselink.jdbc.url" value="jdbc:derby:db/shtmDB;create=true"/>
+			<property name="eclipselink.jdbc.user" value="app"/> 
+			<property name="eclipselink.jdbc.password" value="123"/>
+		</properties>
+	</persistence-unit>
+</persistence>

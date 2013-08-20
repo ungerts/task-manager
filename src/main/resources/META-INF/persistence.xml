@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012 Bangkok Project Team, GRIDSOLUT GmbH + Co.KG, and
+  ~ University of Stuttgart (Institute of Architecture of Application Systems)
+  ~ All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<persistence version="2.0"
+             xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+    <persistence-unit name="HumanTaskManager">
+        <jta-data-source>jdbc/taskmanager</jta-data-source>
+        <class>com.htm.entities.jpa.Workitemtaskview</class>
+        <class>com.htm.entities.jpa.UsersGroupsPK</class>
+        <class>com.htm.entities.jpa.UsersGroups</class>
+        <class>com.htm.entities.jpa.User</class>
+        <class>com.htm.entities.jpa.Presentationinformation</class>
+        <class>com.htm.entities.jpa.Peoplequeryargument</class>
+        <class>com.htm.entities.jpa.Peoplequery</class>
+        <class>com.htm.entities.jpa.LpgArgumentdef</class>
+        <class>com.htm.entities.jpa.Logicalpeoplegroupdef</class>
+        <class>com.htm.entities.jpa.Literal</class>
+        <class>com.htm.entities.jpa.Humantaskmodel</class>
+        <class>com.htm.entities.jpa.Humantaskinstance</class>
+        <class>com.htm.entities.jpa.Group</class>
+        <class>com.htm.entities.jpa.Workitem</class>
+        <class>com.htm.entities.jpa.Callbackcorrelationproperty</class>
+        <class>com.htm.entities.jpa.Attachment</class>
+        <class>com.htm.entities.jpa.Assigneduser</class>
+        <class>com.shtm.structureClasses.StructureData</class>
+        <class>com.allweathercomputing.htm.org.Person</class>
+        <class>com.allweathercomputing.htm.org.Role</class>
+        <class>com.allweathercomputing.htm.org.Organization</class>
+        <class>com.htm.audit.AuditEntry</class>
+        <properties>
+            <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>
+            <property name="eclipselink.application-location"
+                      value="C:\odeschool\workspaces\taskmanager_test\TaskManagerTest\misc"/>
+        </properties>
+    </persistence-unit>
+</persistence>
