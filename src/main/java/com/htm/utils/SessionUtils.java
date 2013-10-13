@@ -24,17 +24,14 @@ public class SessionUtils {
 
     private static final Logger log = Utilities.getLogger(SessionUtils.class);
 
-    //private static String currentUser;
+    private static String currentUser;
 
     public static String getCurrentUser() {
-        //return currentUser;
-        // TODO catch potential NullPointerException
-        String currentUser = JEEUtils.getSessionContext().getCallerPrincipal().getName();
         log.debug("Current user: " + currentUser);
         return currentUser;
     }
 
     public static void setCurrentUser(String userId) {
-        //currentUser = userId;
+        currentUser = userId;
     }
 }
