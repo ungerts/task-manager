@@ -37,7 +37,9 @@ import com.shtm.StructuredTaskClientInterfaceImpl;
 import com.shtm.exceptions.SHTMException;
 import com.shtm.operationAndStates.EStates;
 import com.shtm.views.StructuredTaskInstanceView;
+import org.junit.Ignore;
 
+@Ignore
 public class StructureDataTestUtilities extends TaskParentInterfaceTest {
     protected ITaskClientInterface taskClient = new TaskClientInterfaceImpl();
     public DataAccessProviderJpaJUnit dap;

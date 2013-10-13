@@ -21,7 +21,7 @@
              xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
     <persistence-unit name="HumanTaskManager">
-        <jta-data-source>jdbc/taskmanager</jta-data-source>
+        <!-- <jta-data-source>jdbc/taskmanager</jta-data-source>      -->
         <class>com.htm.entities.jpa.Workitemtaskview</class>
         <class>com.htm.entities.jpa.UsersGroupsPK</class>
         <class>com.htm.entities.jpa.UsersGroups</class>
@@ -44,10 +44,10 @@
         <class>com.allweathercomputing.htm.org.Role</class>
         <class>com.allweathercomputing.htm.org.Organization</class>
         <class>com.htm.audit.AuditEntry</class>
-        <properties>
+       <!-- <properties>
             <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>
             <property name="eclipselink.application-location"
                       value="C:\odeschool\workspaces\taskmanager_test\TaskManagerTest\misc"/>
-        </properties>
+        </properties> -->
     </persistence-unit>
 </persistence>

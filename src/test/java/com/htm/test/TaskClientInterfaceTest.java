@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.htm.ITaskClientInterface;
@@ -56,7 +57,7 @@ import com.htm.utils.Utilities;
 import com.shtm.IStructuredTaskClientInterface;
 import com.shtm.StructuredTaskClientInterfaceImpl;
 
-
+@Ignore
 public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
     protected ITaskClientInterface taskClient = null;

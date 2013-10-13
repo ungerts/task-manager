@@ -22,7 +22,9 @@ import static org.junit.Assert.assertEquals;
 
 import com.shtm.operationAndStates.EStates;
 import com.shtm.views.StructuredTaskInstanceView;
+import org.junit.Ignore;
 
+@Ignore
 public class TestStructureData {
     String task_id;
     EStates state;

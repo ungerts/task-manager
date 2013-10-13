@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.htm.exceptions.HumanTaskManagerException;
@@ -39,6 +40,7 @@ import com.shtm.exceptions.SHTMException;
 import com.shtm.operationAndStates.EStates;
 import com.shtm.structureClasses.ResultStructure;
 
+@Ignore
 public class StructureTestClass {
     String credentials;
     IStructuredTaskClientInterface strTaskClient;

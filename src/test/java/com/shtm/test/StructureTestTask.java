@@ -28,7 +28,9 @@ import com.htm.utils.Utilities;
 import com.shtm.IStructuredTaskClientInterface;
 import com.shtm.operationAndStates.EOperations;
 import com.shtm.views.StructuredTaskInstanceView;
+import org.junit.Ignore;
 
+@Ignore
 public class StructureTestTask {
     EOperations state;
     int strNr = 0;

@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.htm.ITaskModelStore;
@@ -55,6 +56,7 @@ import com.htm.utils.Utilities;
  *
  * @author sew71sgp
  */
+@Ignore
 public class TaskModelRepositoryTest extends TaskModelDummyProvider {
 
 

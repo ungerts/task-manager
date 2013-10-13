@@ -37,6 +37,7 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.htm.ITaskClientInterface;
@@ -54,6 +55,7 @@ import com.htm.taskparent.TaskParentConnectorDummy;
 import com.htm.taskparent.TaskParentContextDummy;
 import com.htm.utils.Utilities;
 
+@Ignore
 public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
 

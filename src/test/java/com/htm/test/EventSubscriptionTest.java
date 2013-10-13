@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -39,6 +40,7 @@ import com.htm.events.IEventSubscriber;
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.query.views.WorkItemView;
 
+@Ignore
 public class EventSubscriptionTest extends TaskParentInterfaceTest {
 
     private EventSubscriber eventSubscriber;
