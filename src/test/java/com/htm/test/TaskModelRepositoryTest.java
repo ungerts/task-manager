@@ -64,7 +64,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:META-INF/spring-beans.xml")
 @Transactional
-@Ignore
 public class TaskModelRepositoryTest extends TaskModelDummyProvider {
 
 
@@ -120,7 +119,7 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
         try {
             dap.beginTx();
 
-            TaskModelStore taskModelStore = new TaskModelStore();
+            ITaskModelStore taskModelStore = this.taskModelStore;
 
             ITaskModel dummyTaskModel1 = createTaskModelDummyLPG(TASK_MODEL_DUMMY_NAME_1);
             ITaskModel dummyTaskModel2 = createTaskModelDummyLiterals(TASK_MODEL_DUMMY_NAME_2);

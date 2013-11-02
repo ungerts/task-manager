@@ -58,7 +58,6 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:META-INF/spring-beans.xml")
 @Transactional
-@Ignore
 public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
 
