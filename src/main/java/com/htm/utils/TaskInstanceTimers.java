@@ -35,7 +35,7 @@ import com.htm.taskinstance.ITaskInstance;
 
 public class TaskInstanceTimers {
 
-    private static IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+    private static IDataAccessProvider dap;
 
     private static Logger log = Utilities.getLogger(TaskInstanceTimers.class);
 

@@ -68,7 +68,7 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
     private IDataAccessProvider dataAccessProvider;
 
     public TaskInstanceFactoryJPA() {
-        this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
+
     }
 
     @Override

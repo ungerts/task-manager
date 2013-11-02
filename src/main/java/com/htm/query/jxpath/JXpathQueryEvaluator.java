@@ -96,15 +96,15 @@ public class JXpathQueryEvaluator implements IQueryEvaluator {
             //
             // return resultList;
             // }
-            if (log.isDebugEnabled()) {
-                log.debug("Evaluating all paths for query'" + query.getQuery() + "'");
-                Iterator paths = this.jXpathContext.iteratePointers("/taskParentContext/properties/child::*");
-                Pointer path;
-                while (paths.hasNext()) {
-                    path = (Pointer) paths.next();
-                    log.debug("Path found: " + path.asPath());
-                }
-            }
+//            if (log.isDebugEnabled()) {
+//                log.debug("Evaluating all paths for query'" + query.getQuery() + "'");
+//                Iterator paths = this.jXpathContext.iteratePointers("/taskParentContext/properties/child::*");
+//                Pointer path;
+//                while (paths.hasNext()) {
+//                    path = (Pointer) paths.next();
+//                    log.debug("Path found: " + path.asPath());
+//                }
+//            }
 
             ArrayList<Object> list = new ArrayList<Object>();
 

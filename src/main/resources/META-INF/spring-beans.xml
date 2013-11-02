@@ -61,13 +61,14 @@
     <!--jpa:repositories base-package="com.htm.db.spring"/-->
     <bean id="dataAccessRepository" class="com.htm.db.spring.DataAccessRepositoryImpl" autowire="byName"/>
     <bean id="taskClientInterface" class="com.htm.TaskClientInterfaceImpl" autowire="byName">
-        <property name="dap" ref="dataAccessRepository"/>
+        <property name="dataAccessProvider" ref="dataAccessRepository"/>
     </bean>
     <bean id="taskModelStore" class="com.htm.TaskModelStore" autowire="byName"/>
     <bean id="iUserManager" class="com.htm.security.UserManagerBasicImpl" autowire="byName"/>
     <bean id="taskParentInterface" class="com.htm.TaskParentInterfaceImpl" autowire="byName"/>
     <bean id="taskInstanceFactory" class="com.htm.taskinstance.jpa.TaskInstanceFactoryJPA" autowire="byName" />
     <bean id="workItemFactory" class="com.htm.taskinstance.jpa.WorkItemFactoryImpl" autowire="byName" />
+    <bean id="authorizationManager" class="com.htm.security.AuthorizationManager" autowire="byName" />
     <context:component-scan base-package="com.htm.peopleresolutionprovider"/>
     <bean id="ilpgResolutionProviderFactory" class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
         <property name="serviceLocatorInterface" value="com.htm.peopleresolution.ILPGResolutionProviderFactory" />

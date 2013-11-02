@@ -48,7 +48,7 @@ public interface IDataAccessProvider {
 
         //private static IDataAccessProvider dataAccessProvider = null;
 
-        public static IDataAccessProvider newInstance() {
+       // public static IDataAccessProvider newInstance() {
 
 //			/* Singleton - Only one instance of the data access provider can be created */
 //			if (dataAccessProvider == null) {
@@ -62,8 +62,8 @@ public interface IDataAccessProvider {
 //			}
 //			return dataAccessProvider;
             // TODO introduce properties to maintain "lightness"
-            return null;
-        }
+       //     return null;
+      //  }
     }
 
     //Only for testing purposes

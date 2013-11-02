@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.htm.security.IAuthorizationManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -44,7 +45,6 @@ import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.exceptions.InvalidOperationException;
 import com.htm.query.views.TaskInstanceView;
 import com.htm.query.views.WorkItemView;
-import com.htm.security.AuthorizationManager;
 import com.htm.security.EActions;
 import com.htm.taskinstance.ETaskInstanceState;
 import com.htm.taskinstance.IAssignedUser;
@@ -73,7 +73,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     /**
      * Provides access to the persistence layer.
      */
-    private IDataAccessProvider dap;
+    @Autowired
+    private IDataAccessProvider dataAccessProvider;
 
     protected EventHandler evenHandler;
 
@@ -87,6 +88,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
     @Autowired
     private WorkItemFactory workItemFactory;
+
+    @Autowired
+    private IAuthorizationManager authorizationManager;
 
     /**
      * Creates a new {@link TaskClientInterfaceImpl} object.</b> It initializes
@@ -116,7 +120,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void claim(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
             /* Check if task instance is already claimed */
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -132,7 +136,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
             checkIfTaskInstanceExpired(taskInstance, EActions.CLAIM.toString());
 
-            IAssignedUser user = AuthorizationManager
+            IAssignedUser user = this.authorizationManager
                     .authorizeTaskClientAction(tiid, EActions.CLAIM);
 
             /*
@@ -148,7 +152,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 throw new InvalidOperationException(e);
             }
 
-            List<IWorkItem> workItems = dap.getWorkItems(tiid, user);
+            List<IWorkItem> workItems = dataAccessProvider.getWorkItems(tiid, user);
             Iterator<IWorkItem> iter = workItems.iterator();
 
             /*
@@ -178,12 +182,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -197,9 +201,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws IllegalArgumentException, HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.COMPLETE);
             ITaskInstance taskInstance = getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();
@@ -243,12 +247,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -262,12 +266,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            IAssignedUser user = AuthorizationManager
+            IAssignedUser user = this.authorizationManager
                     .authorizeTaskClientAction(tiid, EActions.ADD_ATTACHMENT);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            IAssignedUser assignedUser = dap.getAssignedUser(user.getUserId());
+            IAssignedUser assignedUser = dataAccessProvider.getAssignedUser(user.getUserId());
 
             /*
                 * Should never become null since method authorizeUserForAction
@@ -284,12 +288,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 throw new AuthorizationException(errorMsg);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -304,9 +308,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            IAssignedUser assignedUser = AuthorizationManager
+            IAssignedUser assignedUser = this.authorizationManager
                     .authorizeTaskClientAction(tiid,
                             EActions.DELETE_ATTACHMENTS);
 
@@ -336,13 +340,13 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             /* Set a new list of attachments without the deleted ones */
             taskInstance.setAttachments(assignedUser, attachments);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return attachmentDeleted;
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -356,8 +360,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_ATTACHMENTS);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -382,13 +386,13 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 }
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return attachments2Return;
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -401,21 +405,21 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.DELETE_FAULT);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             taskInstance.setFaultData(null);
             taskInstance.setFaultName(null);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -427,20 +431,20 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void deleteOutput(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.DELETE_OUTPUT);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             taskInstance.setOutputData(null);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -455,9 +459,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid, EActions.FAIL);
+            this.authorizationManager.authorizeTaskClientAction(tiid, EActions.FAIL);
             // TODO what happens if the fault object was set before via setFault
             // method
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -502,12 +506,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -519,17 +523,17 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
       */
     public IFault getFault(String tiid) throws HumanTaskManagerException {
         try {
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_FAULT);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return taskInstance.getFault();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -542,17 +546,17 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public Object getInput(String tiid) throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_INPUT);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return taskInstance.getInput();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -563,17 +567,17 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
       */
     public Object getOutput(String tiid) throws HumanTaskManagerException {
         try {
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_OUTPUT);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return taskInstance.getOutput();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -586,18 +590,18 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_TASK_DESCRIPTION);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return taskInstance.getPresentationDescription();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -611,18 +615,18 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.GET_TASK_INFO);
             ITaskInstance taskInstance = getTaskInstance(tiid);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
 
             return new TaskInstanceView(taskInstance);
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -646,8 +650,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void release(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.RELEASE);
 
             /* Fist simply change the state of the task instance to ready */
@@ -668,7 +672,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             }
 
             /* Secondly revoke the 'claimed' state for all work items. */
-            List<IWorkItem> workItems = dap.getWorkItems(tiid);
+            List<IWorkItem> workItems = dataAccessProvider.getWorkItems(tiid);
             Iterator<IWorkItem> iter = workItems.iterator();
             while (iter.hasNext()) {
                 IWorkItem workItem = (IWorkItem) iter.next();
@@ -690,12 +694,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -708,8 +712,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void resume(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.RESUME);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -741,12 +745,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -761,21 +765,21 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.SET_FAULT);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             taskInstance.setFaultName(faultName);
             taskInstance.setFaultData(faultMessage);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -789,20 +793,20 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.SET_OUTPUT);
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessProvider.getTaskInstance(tiid);
             taskInstance.setOutputData(output);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -816,19 +820,19 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.SET_PRIORITY);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             taskInstance.setPriority(priority);
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -839,11 +843,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
       */
     public void skip(String tiid) throws IllegalArgumentException,
             HumanTaskManagerException {
+        log.debug("Trying to skip task with id '" + tiid + "'");
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid, EActions.SKIP);
+            this.authorizationManager.authorizeTaskClientAction(tiid, EActions.SKIP);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();
@@ -883,12 +888,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 log.error(errorMsg);
                 throw new InvalidOperationException(errorMsg);
             }
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -900,9 +905,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void start(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager
+            this.authorizationManager
                     .authorizeTaskClientAction(tiid, EActions.START);
             ITaskInstance taskInstance = getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();
@@ -924,12 +929,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -942,9 +947,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void stop(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
-            AuthorizationManager.authorizeTaskClientAction(tiid, EActions.STOP);
+            this.authorizationManager.authorizeTaskClientAction(tiid, EActions.STOP);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();
@@ -971,12 +976,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -988,8 +993,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
     public void suspend(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.SUSPEND);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -1020,12 +1025,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -1039,8 +1044,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.SUSPEND_UNTIL);
 
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -1083,12 +1088,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 * suspend until time has expired
                 */
             TaskInstanceTimers.activateSuspendUntilTimer(taskInstance);
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -1101,9 +1106,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskQueryAction(EActions.QUERY);
-            List<IWorkItem> workItems = dap.query(whereClause, maxResults);
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskQueryAction(EActions.QUERY);
+            List<IWorkItem> workItems = dataAccessProvider.query(whereClause, maxResults);
             Iterator<IWorkItem> iter = workItems.iterator();
             List<WorkItemView> workItemViews = new ArrayList<WorkItemView>();
 
@@ -1119,9 +1124,9 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                     /*
                           * Currently anybody can get any information about any task
                           * instance/work item. This can be changed in the
-                          * AuthorizationManager
+                          * this.authorizationManager
                           */
-                    AuthorizationManager.authorizeTaskClientAction(workItem
+                    this.authorizationManager.authorizeTaskClientAction(workItem
                             .getTaskInstance().getId(),
                             EActions.READ_WORK_ITEM_VIEW_TUPLE);
                     /* Create the view of the work item */
@@ -1135,13 +1140,13 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                           */
                 }
             }
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return workItemViews;
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -1183,7 +1188,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
      */
     protected ITaskInstance getTaskInstance(String tiid)
             throws IllegalArgumentException, DatabaseException {
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessProvider.getTaskInstance(tiid);
 
         if (taskInstance != null) {
             return taskInstance;
@@ -1236,8 +1241,8 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
         // stakeholder sind
         try {
             /* Start transaction */
-            dap.beginTx();
-            AuthorizationManager.authorizeTaskClientAction(tiid,
+            dataAccessProvider.beginTx();
+            this.authorizationManager.authorizeTaskClientAction(tiid,
                     EActions.FORWARD);
 
             /* Fist simply change the state of the task instance to ready */
@@ -1287,14 +1292,14 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 */
             IAssignedUser assignedUser = this.taskInstanceFactory
                     .createAssignedUser(forwardeeId);
-            IWorkItem potentialOwnerWI = dap.getWorkItem(tiid, assignedUser,
+            IWorkItem potentialOwnerWI = dataAccessProvider.getWorkItem(tiid, assignedUser,
                     EHumanRoles.POTENTIAL_OWNER);
             if (potentialOwnerWI == null) {
                 /* Add the forwardee to the list of potential owners */
                 WorkItemFactory workItemFac = this.workItemFactory;
                 potentialOwnerWI = workItemFac.createNewWorkItem(forwardeeId,
                         EHumanRoles.POTENTIAL_OWNER, taskInstance);
-                dap.persistWorkItem(potentialOwnerWI);
+                dataAccessProvider.persistWorkItem(potentialOwnerWI);
             }
             /*
                 * Since she has to become an actual owner the task must be claimed
@@ -1314,12 +1319,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
@@ -1357,7 +1362,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
             throws HumanTaskManagerException {
         try {
             /* Start transaction */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
 
             /* Check if task instance is already claimed */
             ITaskInstance taskInstance = getTaskInstance(tiid);
@@ -1374,7 +1379,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
             checkIfTaskInstanceExpired(taskInstance, EActions.CLAIM.toString());
 
-            IAssignedUser user = AuthorizationManager
+            IAssignedUser user = this.authorizationManager
                     .authorizeTaskClientAction2(tiid, userid, EActions.CLAIM);
 
             /*
@@ -1390,7 +1395,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 throw new InvalidOperationException(e);
             }
 
-            List<IWorkItem> workItems = dap.getWorkItems(tiid, user);
+            List<IWorkItem> workItems = dataAccessProvider.getWorkItems(tiid, user);
             Iterator<IWorkItem> iter = workItems.iterator();
 
             /*
@@ -1420,21 +1425,21 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }
 
-    public IDataAccessProvider getDap() {
-        return dap;
+    public IDataAccessProvider getDataAccessProvider() {
+        return dataAccessProvider;
     }
 
-    public void setDap(IDataAccessProvider dap) {
-        this.dap = dap;
+    public void setDataAccessProvider(IDataAccessProvider dataAccessProvider) {
+        this.dataAccessProvider = dataAccessProvider;
     }
 }

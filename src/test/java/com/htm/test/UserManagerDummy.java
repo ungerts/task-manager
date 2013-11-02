@@ -63,6 +63,7 @@ public class UserManagerDummy extends SecurityContextInitializer {
     @Autowired
     protected TaskInstanceFactory taskInstanceFactory;
 
+
     protected void createDummyUsersAndGroups() throws HumanTaskManagerException {
 
         IUserManager um = this.iUserManager;

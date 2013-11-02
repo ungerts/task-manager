@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.htm.ITaskClientInterface;
 import com.htm.ITaskModelStore;
 import com.htm.TaskModelStore;
 import com.htm.db.DataAccessProviderJpaJUnit;
@@ -79,7 +80,10 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
     protected DataAccessRepositoryCustom dataAccessRepository;
 
     @Autowired
-    ITaskModelStore taskModelStore;
+    protected ITaskModelStore taskModelStore;
+
+    @Autowired
+    protected ITaskClientInterface taskClientInterface;
 
 
     protected void createPeopleGroupDefDummies() throws HumanTaskManagerException {

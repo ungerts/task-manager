@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.htm.security.IAuthorizationManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -80,6 +81,9 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
     @Autowired
     private WorkItemFactory workItemFactory;
 
+    @Autowired
+    private IAuthorizationManager authorizationManager;
+
     /**
      * Creates a new {@link TaskParentInterfaceImpl} object.</b> It initializes
      * the {@link IDataAccessProvider}</b> Moreover all timers are reactivated
@@ -124,7 +128,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
 
             /* Start transaction for creating a task instance */
             dataAccessProvider.beginTx();
-            AuthorizationManager.authorizeTaskParentAction(initiatorUserId,
+            this.authorizationManager.authorizeTaskParentAction(initiatorUserId,
                     null, EActions.CREATE_TASK_INSTANCE);
 
             /* Create the task instance model */
@@ -254,7 +258,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
             dataAccessProvider.beginTx();
             log.debug("Exit task instance - Trying to exit task instance '"
                     + tiid + "'");
-            AuthorizationManager.authorizeTaskParentAction(getCurrentUser(),
+            this.authorizationManager.authorizeTaskParentAction(getCurrentUser(),
                     tiid, EActions.EXIT);
             ITaskInstance taskInstance = dataAccessProvider.getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();

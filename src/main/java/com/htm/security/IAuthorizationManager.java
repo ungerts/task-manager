@@ -18,6 +18,35 @@
 
 package com.htm.security;
 
+import com.htm.dm.EHumanRoles;
+import com.htm.exceptions.*;
+import com.htm.taskinstance.IAssignedUser;
+
+import java.lang.IllegalArgumentException;
+import java.util.List;
+
 public interface IAuthorizationManager {
+
+    public IAssignedUser authorizeTaskQueryAction(EActions action)
+            throws HumanTaskManagerException;
+
+    public void authorizeTaskParentAction(String userId, String tiid,
+                                   EActions action) throws AuthenticationException,
+            IllegalArgumentException, DatabaseException, AuthorizationException;
+
+    public IAssignedUser authorizeTaskClientAction(String tiid,
+                                            EActions action) throws AuthorizationException,
+            AuthenticationException, IllegalArgumentException,
+            DatabaseException, UserException;
+
+    // TODO is implementation correct?
+    // TODO reduce redundancy
+    public IAssignedUser authorizeTaskClientAction2(String tiid,
+                                             String userId, EActions action) throws AuthorizationException,
+            AuthenticationException, IllegalArgumentException,
+            DatabaseException, UserException;
+
+    public List<EHumanRoles> getRolesOfUser(String tiid, String userId)
+            throws HumanTaskManagerException;
 
 }

@@ -270,7 +270,7 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
             initSecurityContext(TASK_INITIATOR_USER_ID, TASK_INITIATOR_PASSWORD);
 
             /* Create task instance without input data, attachment, correlation properties */
-            String tiid = partenInterface.createTaskInstance(null, null,
+            String tiid = partenInterface.createTaskInstance(TaskParentConnectorDummy.TASK_PARENT_ID, null,
                     TASK_MODEL_DUMMY_NAME_2, TASK_INSTANCE_DUMMY_NAME1,
                     null, null, null);
 
@@ -369,8 +369,8 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
             TaskParentInterface partenInterface = this.taskParentInterface;
 
             /* The task instance has to be skipped to go into the obsolete state */
-            ITaskClientInterface taskClient = new TaskClientInterfaceImpl();
-            taskClient.skip(tiid);
+            ITaskClientInterface taskClient = this.taskClientInterface;
+            this.taskClientInterface.skip(tiid);
 
             /* Then try to exit the skipped task instance, an exception is expected */
             partenInterface.exit(tiid);

@@ -49,13 +49,13 @@ public class UserManagerBasicImpl implements IUserManager {
     protected Logger log;
 
     public UserManagerBasicImpl() {
-        this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
+        this.dataAccessProvider = this.dataAccessProvider;
         this.log = Utilities.getLogger(this.getClass());
     }
 
     public IUser addUser(String userId,
                          String firstName, String lastName, String password) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.ADD_USER);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.ADD_USER);
 
         IUser user = UserDirectoryFactory.newInstance().createNewUser(
                 userId, firstName, lastName, password);
@@ -65,7 +65,7 @@ public class UserManagerBasicImpl implements IUserManager {
     }
 
     public boolean changePassword(String userId, String newpassword) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.CHANGE_PASSWORD);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.CHANGE_PASSWORD);
 
         /* Get the user model from the database and set the new pasword */
         IUser user = dataAccessProvider.getUser(userId);
@@ -77,14 +77,14 @@ public class UserManagerBasicImpl implements IUserManager {
     }
 
     public boolean deleteUser(String userId) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_USER);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.DELETE_USER);
 
         return dataAccessProvider.deleteUser(userId);
 
     }
 
     public IGroup addGroup(String groupName) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.ADD_GROUP);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.ADD_GROUP);
         /* Create group model and persist it */
         IGroup group = UserDirectoryFactory.newInstance().createNewGroup(groupName);
         dataAccessProvider.persistGroup(group);
@@ -93,20 +93,20 @@ public class UserManagerBasicImpl implements IUserManager {
     }
 
     public boolean deleteGroup(String groupName) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_GROUP);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.DELETE_GROUP);
 
         return dataAccessProvider.deleteGroup(groupName);
     }
 
     public IGroup getGroup(String groupName) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.GET_GROUP);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.GET_GROUP);
         /* Check if the passed credentials are correct */
         return dataAccessProvider.getGroup(groupName);
 
     }
 
     public IUser getUser(String userId) throws HumanTaskManagerException {
-        AuthorizationManager.authorizeAdministrativeAction(EActions.GET_USER);
+        AuthorizationUtils.authorizeAdministrativeAction(EActions.GET_USER);
         return dataAccessProvider.getUser(userId);
 
     }
