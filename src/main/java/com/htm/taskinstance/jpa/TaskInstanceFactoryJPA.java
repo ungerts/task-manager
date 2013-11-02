@@ -50,7 +50,10 @@ import com.htm.taskinstance.TaskInstanceFactory;
 import com.htm.taskmodel.IPresentationModel;
 import com.htm.taskmodel.ITaskModel;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
 
     public static final short PRIORITY_DEFAULT = 0;
@@ -61,10 +64,11 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
 
     private Logger log = Utilities.getLogger(this.getClass());
 
-    private IDataAccessProvider dap;
+    @Autowired
+    private IDataAccessProvider dataAccessProvider;
 
     public TaskInstanceFactoryJPA() {
-        this.dap = IDataAccessProvider.Factory.newInstance();
+        this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
     }
 
     @Override
@@ -77,7 +81,7 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
            * Naturally the underlying task model is required to instantiate the
            * task
            */
-        ITaskModel taskModel = dap.getHumanTaskModel(taskModelName);
+        ITaskModel taskModel = dataAccessProvider.getHumanTaskModel(taskModelName);
 
         if (taskModel == null) {
             String errorMsg = "No task model with the name '" + taskModelName
@@ -437,64 +441,30 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
     public ITaskInstance createTaskInstanceFromEntity(
             WrappableEntity taskInstanceObject) {
 
-        Humantaskinstance taskInstanceEntity = null;
+        return Utilities.createTaskInstanceFromEntity(taskInstanceObject);
 
-        if (taskInstanceObject instanceof Humantaskinstance) {
-            taskInstanceEntity = (Humantaskinstance) taskInstanceObject;
-            return new TaskInstanceWrapper(taskInstanceEntity);
-
-        } else {
-            throw new RuntimeException("Invalid class error. "
-                    + "Task instance entity object must be of type "
-                    + Humantaskinstance.class);
-        }
 
     }
 
     @Override
     public IAssignedUser createAssignedUserFromEntity(
             WrappableEntity assignedUserObject) {
-        if (assignedUserObject == null) {
-            return null;
-        }
 
-        /*
-           * Check if it is a JPA object that represents the assigned user entity
-           */
-        Utilities.isValidClass(assignedUserObject, Assigneduser.class);
-        return new AssignedUserWrapper((Assigneduser) assignedUserObject);
+        return Utilities.createAssignedUserFromEntity(assignedUserObject);
     }
 
     @Override
     public IAttachment createAttachmentFromEntity(
             WrappableEntity attachmentObject) {
-        Attachment attachmentEntity = null;
+        return Utilities.createAttachmentFromEntity(attachmentObject);
 
-        if (attachmentObject instanceof Attachment) {
-            attachmentEntity = (Attachment) attachmentObject;
-            return new AttachmentWrapper(attachmentEntity);
-
-        } else {
-            throw new RuntimeException("Invalid class error. "
-                    + "Attachment entity object must be of type "
-                    + Attachment.class);
-        }
     }
 
     @Override
     public ICorrelationProperty createCorrelationPropertyFromEntity(
             WrappableEntity correlationPropsObject) {
-        Callbackcorrelationproperty attachmentEntity = null;
+        return Utilities.createCorrelationPropertyFromEntity(correlationPropsObject);
 
-        if (correlationPropsObject instanceof Callbackcorrelationproperty) {
-            attachmentEntity = (Callbackcorrelationproperty) correlationPropsObject;
-            return new CorrelationPropertiesWrapper(attachmentEntity);
-
-        } else {
-            throw new RuntimeException("Invalid class error. "
-                    + "Correlation property entity object must be of type "
-                    + Attachment.class);
-        }
     }
 
     @Override
@@ -509,7 +479,7 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
            * Since assigned users must be unique within the database it is checked
            * if the assigned user already exists within the database
            */
-        IAssignedUser assignedUser = dap.getAssignedUser(userId);
+        IAssignedUser assignedUser = this.dataAccessProvider.getAssignedUser(userId);
         if (assignedUser != null) {
             return assignedUser;
         }
@@ -525,15 +495,17 @@ public class TaskInstanceFactoryJPA extends TaskInstanceFactory {
 
     @Override
     public IFault createFault(String name, Object faultData) {
-        return new FaultImpl(name, faultData);
+        return Utilities.createFault(name, faultData);
+
+
     }
 
     @Override
     public void evaluateQueryProperties(String tiid, String taskModelName) {
         log.debug("Evaluating query properties - tiid '" + tiid + "'");
         try {
-            ITaskModel model = dap.getHumanTaskModel(taskModelName);
-            ITaskInstance instance = dap.getTaskInstance(tiid);
+            ITaskModel model = dataAccessProvider.getHumanTaskModel(taskModelName);
+            ITaskInstance instance = dataAccessProvider.getTaskInstance(tiid);
             IQuery queryProperty1 = model.getQueryProperty1();
             if (queryProperty1 != null) {
                 log.debug("Query Property 1: " + queryProperty1.getQuery());

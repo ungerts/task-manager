@@ -26,16 +26,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.htm.peopleresolution.*;
 import org.apache.log4j.Logger;
 
 import com.htm.dm.EHumanRoles;
 import com.htm.entities.jpa.Workitem;
 import com.htm.exceptions.DatabaseException;
 import com.htm.exceptions.HumanTaskManagerException;
-import com.htm.peopleresolution.IPeopleResolutionProvider;
-import com.htm.peopleresolution.LPGResolutionProviderFactory;
-import com.htm.peopleresolution.PeopleAssignmentPostProcessor;
-import com.htm.peopleresolution.PeopleAssignmentResult;
 import com.htm.taskinstance.IAssignedUser;
 import com.htm.taskinstance.ITaskInstance;
 import com.htm.taskinstance.IWorkItem;
@@ -45,10 +42,16 @@ import com.htm.taskmodel.ILiteral;
 import com.htm.taskmodel.IPeopleAssignment;
 import com.htm.taskmodel.ITaskModel;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class WorkItemFactoryImpl extends WorkItemFactory {
 
     protected Logger log;
+
+    @Autowired
+    private ILPGResolutionProviderFactory ilpgResolutionProviderFactory;
 
     public WorkItemFactoryImpl() {
         this.log = Utilities.getLogger(this.getClass());
@@ -159,7 +162,7 @@ public class WorkItemFactoryImpl extends WorkItemFactory {
         workItem.setAssignedToEverbody(false);
         log.debug("Work Item Creation - Work item assignee '" + userid + "'.");
 
-        IAssignedUser assignedUser = TaskInstanceFactory.newInstance().createAssignedUser(userid);
+        IAssignedUser assignedUser = this.taskInstanceFactory.createAssignedUser(userid);
 
 
         workItem.setAssignee(assignedUser);
@@ -182,9 +185,8 @@ public class WorkItemFactoryImpl extends WorkItemFactory {
       */
     public IWorkItem createWorkItemFromEntity(Object workItemObject) {
 
-        Utilities.isValidClass(workItemObject, Workitem.class);
+        return Utilities.createWorkItemFromEntity(workItemObject);
 
-        return new WorkItemWrapper((Workitem) workItemObject);
     }
 
     /**
@@ -202,8 +204,9 @@ public class WorkItemFactoryImpl extends WorkItemFactory {
 
         if (peopleQuery != null) {
             log.debug("People query evaluation - Logical people group name:" + peopleQuery.getBoundPeopleGroup().getName());
-            IPeopleResolutionProvider peopleReolutionProvider =
-                    LPGResolutionProviderFactory.createPeopleResolutionProvider(peopleQuery.getBoundPeopleGroup());
+            IPeopleResolutionProvider peopleReolutionProvider = this.ilpgResolutionProviderFactory.createPeopleResolutionProvider("userByGroup");
+                    //LPGResolutionProviderFactory.createPeopleResolutionProvider(peopleQuery.getBoundPeopleGroup());
+
             PeopleAssignmentResult resultSet = peopleReolutionProvider.executePeopleQuery(peopleQuery, taskInstance);
 
 

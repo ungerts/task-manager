@@ -54,9 +54,14 @@ import com.htm.taskinstance.TaskInstanceFactory;
 import com.htm.taskparent.TaskParentConnectorDummy;
 import com.htm.taskparent.DummyCallbackHandler.TaskParentCallbackResponseContainer;
 import com.htm.utils.Utilities;
-import com.shtm.IStructuredTaskClientInterface;
-import com.shtm.StructuredTaskClientInterfaceImpl;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:META-INF/spring-beans.xml")
+@Transactional
 @Ignore
 public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
@@ -78,7 +83,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void testClaimAndRelease() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /* Test claiming a task as potential owners */
             String userId = getExpectedPotentialOwners()[0];
             String tiid = createTaskInstanceDummy();
@@ -97,12 +102,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             testReleaseOperation(tiid, userId, USER_PASSWORD);
 
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -111,7 +116,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void claimTwice() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
 
             /* Try to claim the task instance twice -> an exception is expected */
             String tiid = createTaskInstanceDummy();
@@ -121,12 +126,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             testClaimOperation(tiid, userId, USER_PASSWORD);
 
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -135,17 +140,17 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void releaseNonClaimedTaskInstance() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedBusinessAdministrators()[0];
             testReleaseOperation(tiid, userId, USER_PASSWORD);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -162,7 +167,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void startOperation() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -171,15 +176,15 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.claim(tiid);
             taskClient.start(tiid);
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             assertEquals(ETaskInstanceState.IN_PROGRESS, taskInstance.getStatus());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -188,7 +193,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void startUnclaimedOperation() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -196,12 +201,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* AuthorizationException expected */
             taskClient.start(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -210,7 +215,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void stopOperation() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -220,15 +225,15 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.start(tiid);
             taskClient.stop(tiid);
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             assertEquals(ETaskInstanceState.RESERVED, taskInstance.getStatus());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -237,7 +242,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void stopNotStartedTaskInstance() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -247,12 +252,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* IllegalArgumentException expected */
             taskClient.stop(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -261,7 +266,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void completeOperation() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -271,7 +276,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.start(tiid);
             taskClient.complete(tiid, getOutputDataDummy());
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             /* Check if the expected attributes in the task instance were set */
             assertEquals(ETaskInstanceState.COMPLETED, taskInstance.getStatus());
             assertEquals(getOutputDataDummy(), (String) taskInstance.getOutput());
@@ -284,12 +289,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             assertCorrelationProperties(taskInstance.getCorrelationProperties(),
                     TaskParentCallbackResponseContainer.getCorrelationProperties());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -298,7 +303,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void completeWithoutOutput() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -307,12 +312,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.claim(tiid);
             taskClient.start(tiid);
             taskClient.complete(tiid, null);
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -320,7 +325,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     @Test(expected = InvalidOperationException.class)
     public void completeNonStartedOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -330,12 +335,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* InvalidArgumentException expected since task instance is not in state IN_PROGRESS */
             taskClient.complete(tiid, getOutputDataDummy());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -343,7 +348,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void failOperation() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String expectedFaultName = "MyFault";
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
@@ -355,7 +360,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.start(tiid);
             taskClient.fail(tiid, expectedFaultName, getFaultDataDummy());
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             /* Check if the expected attributes in the task instance were set */
             assertEquals(ETaskInstanceState.FAILED, taskInstance.getStatus());
             assertEquals(expectedFaultName, taskInstance.getFault().getName());
@@ -371,12 +376,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             assertCorrelationProperties(taskInstance.getCorrelationProperties(),
                     TaskParentCallbackResponseContainer.getCorrelationProperties());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -384,7 +389,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     @Test(expected = InvalidOperationException.class)
     public void failNonStartedOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             String expectedFaultName = "MyFault";
@@ -395,19 +400,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * task isn't in state 'In Progress' */
             taskClient.fail(tiid, expectedFaultName, getFaultDataDummy());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void failOperationWithoutFaultMsg() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             String expectedFaultName = "MyFault";
@@ -418,19 +423,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* InvalidArgumentException expected since fault message is null */
             taskClient.fail(tiid, expectedFaultName, null);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void failOperationWithoutFaultName() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -439,19 +444,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* InvalidArgumentException expected since fault name is null */
             taskClient.fail(tiid, null, getFaultDataDummy());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void suspendAndResumeOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -482,12 +487,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* Resume task instance */
             testResumeOperation(tiid, ETaskInstanceState.IN_PROGRESS);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -499,7 +504,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     @Test(expected = InvalidOperationException.class)
     public void suspendNotSuspendableTask() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -508,38 +513,38 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.complete(tiid, getOutputDataDummy());
             /* Completed task instance can't  be suspended -> Exception expected */
             testSuspendOperation(tiid, ETaskInstanceState.SUSPENDED_IN_PROGRESS);
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = InvalidOperationException.class)
     public void resumeNotSuspendedTask() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
             /* Resume task instance that was never suspended -> Exception expected */
             testResumeOperation(tiid, ETaskInstanceState.READY);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void skipOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /* Test skip operation as task initiator */
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedTaskInitiator();
@@ -565,19 +570,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.claim(tiid);
             testSkipOperation(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = InvalidOperationException.class)
     public void skipCompletedOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
 
@@ -588,21 +593,21 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* Exception is expected since task client is already completed */
             testSkipOperation(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = InvalidOperationException.class)
     public void skipNonSkipableTask() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             /* Task instance must not be skip */
             taskInstance.setSkipable(false);
             String userId = getExpectedBusinessAdministrators()[0];
@@ -612,19 +617,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * the task instance */
             testSkipOperation(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = AuthorizationException.class)
     public void skipOperationInvalidUser() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -633,12 +638,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * the task instance */
             testSkipOperation(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -646,7 +651,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     public void suspendUntilOperation() throws HumanTaskManagerException, InterruptedException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /* A completed operation can not be skipped */
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
@@ -671,20 +676,20 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             assertEquals(ETaskInstanceState.READY.toString(), taskInstance.getStatus());
             assertTrue(!taskInstance.isSuspended());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = InvalidOperationException.class)
     public void suspendUntilWithASuspendedTask() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -698,19 +703,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* Suspend again */
             taskClient.suspendUntil(tiid, suspendUntilTime);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void addAndGetAttachment() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -725,15 +730,15 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String attachment2AccessType = IAttachment.ACCESS_TYPE_REFERENCE;
             String attachment2ContentType = "URL";
             byte[] attachment2Content = Utilities.getBLOBFromString("http://www.htm.junit.attachment2.com");
-
+            
             IAttachment attachment1 =
-                    TaskInstanceFactory.newInstance().createAttachment(attachment1Name);
+                    this.taskInstanceFactory.createAttachment(attachment1Name);
             attachment1.setAccessType(attachment1AccessType);
             attachment1.setContentType(attachment1ContentType);
             attachment1.setContent(attachment1Content);
 
             IAttachment attachment2 =
-                    TaskInstanceFactory.newInstance().createAttachment(attachment2Name);
+                    this.taskInstanceFactory.createAttachment(attachment2Name);
             attachment2.setAccessType(attachment2AccessType);
             attachment2.setContentType(attachment2ContentType);
             attachment2.setContent(attachment2Content);
@@ -786,12 +791,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                     timeAfterAddingAttachments >= resultAttachment2.getAttachedAt().getTime());
             assertEquals(userId, resultAttachment2.getAttachedBy().getUserId());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 //	@Test
@@ -807,7 +812,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     @Test
     public void addAndDeleteAttachment() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedBusinessAdministrators()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -818,7 +823,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String attachmentContentType = "String";
             byte[] attachmentContent = Utilities.getBLOBFromString("Test content for junit test: add and delete attachment");
             IAttachment attachment =
-                    TaskInstanceFactory.newInstance().createAttachment(attachmentName);
+                    this.taskInstanceFactory.createAttachment(attachmentName);
             attachment.setAccessType(attachmentAccessType);
             attachment.setContentType(attachmentContentType);
             attachment.setContent(attachmentContent);
@@ -832,24 +837,24 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             List<IAttachment> attachments = taskClient.getAttachments(tiid, attachmentName);
             assertEquals(0, attachments.size());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void setAndGetFault() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
 
-            IFault expectedFault = TaskInstanceFactory.newInstance().createFault("myFault", getFaultDataDummy());
+            IFault expectedFault = this.taskInstanceFactory.createFault("myFault", getFaultDataDummy());
             /* Task has to be claimed because only actual owners can set fault data */
             taskClient.claim(tiid);
             taskClient.setFault(tiid,
@@ -863,24 +868,24 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             IFault resultFault = taskClient.getFault(tiid);
             assertEquals(expectedFault.getName(), resultFault.getName());
             assertEquals((String) expectedFault.getData(), (String) resultFault.getData());
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void setAndDeleteFault() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
 
-            IFault expectedFault = TaskInstanceFactory.newInstance().createFault("myFault", getFaultDataDummy());
+            IFault expectedFault = this.taskInstanceFactory.createFault("myFault", getFaultDataDummy());
             /* Task has to be claimed because only actual owners can set fault data */
             taskClient.claim(tiid);
             taskClient.setFault(tiid,
@@ -896,20 +901,20 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             resultFault = taskClient.getFault(tiid);
             assertNull(resultFault);
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void setGetAndDeleteOutput() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -926,13 +931,13 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             taskClient.deleteOutput(tiid);
             assertNull(taskClient.getOutput(tiid));
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -940,7 +945,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     @Test
     public void getInput() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedBusinessAdministrators()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -949,20 +954,20 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * if the input dummies are equal */
             assertTrue(getInputDataDummy().equals((Map<String, String>) taskClient.getInput(tiid)));
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void getTaskDescription() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedBusinessAdministrators()[0];
             initSecurityContext(userId, USER_PASSWORD);
@@ -971,20 +976,20 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String description = taskClient.getTaskDescription(tiid);
             assertEquals(PRESENTATION_DESC, description);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test
     public void query() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /*
                 * Create three different task instances. Two of the are claimed by the same
                 * user.
@@ -1023,27 +1028,27 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             assertTrue(workItemViews.get(1).isClaimed());
 
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
             e.printStackTrace();
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
     @Test(expected = InvalidOperationException.class)
     public void claimExpiredTask() throws InterruptedException, HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /* The task expires within 5 seconds */
             long duration = (long) 5000;
             Timestamp expirationTime = new Timestamp(Utilities.getCurrentTime().getTime() + duration);
             log.debug(Utilities.formatTimestamp(Utilities.getCurrentTime()));
             String tiid = createTaskInstanceDummy(expirationTime);
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             String userId = getExpectedBusinessAdministrators()[0];
             /* Task instance should not be expired yet */
             assertFalse(taskInstance.isExpired());
@@ -1056,13 +1061,13 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* Try to claim a task instance that is expired */
             taskClient.claim(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
 
@@ -1076,7 +1081,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     protected String createTaskInstanceDummy(Timestamp expirationTime) throws HumanTaskManagerException {
         initSecurityContext(TASK_INITIATOR_USER_ID, TASK_INITIATOR_PASSWORD);
 
-        TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+        TaskParentInterface partenInterface = this.taskParentInterface;
 
         return partenInterface.createTaskInstance(TaskParentConnectorDummy.TASK_PARENT_ID, getCorrelationPropertyDummies(),
                 TASK_MODEL_DUMMY_NAME_1, TASK_INSTANCE_DUMMY_NAME1,
@@ -1087,7 +1092,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
     protected void testSuspendOperation(String tiid, ETaskInstanceState suspendState) throws HumanTaskManagerException {
         taskClient.suspend(tiid);
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(suspendState, taskInstance.getStatus());
         assertTrue(taskInstance.isSuspended());
@@ -1095,14 +1100,14 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
     protected void testSkipOperation(String tiid) throws HumanTaskManagerException {
         taskClient.skip(tiid);
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(ETaskInstanceState.OBSOLETE, taskInstance.getStatus());
     }
 
     protected void testResumeOperation(String tiid, ETaskInstanceState nonSuspendedState) throws HumanTaskManagerException {
         taskClient.resume(tiid);
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(nonSuspendedState, taskInstance.getStatus());
         assertFalse(taskInstance.isSuspended());
@@ -1113,7 +1118,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
         initSecurityContext(userId, password);
         taskClient.claim(tiid);
 
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
         assertEquals(ETaskInstanceState.RESERVED.toString(), taskInstance.getStatus().toString());
         /* Owner must now be actual owner */
         assertEquals(userId, taskInstance.getActualOwner());
@@ -1127,7 +1132,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
         taskClient.release(tiid);
 
-        ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+        ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
         assertEquals(ETaskInstanceState.READY.toString(), taskInstance.getStatus().toString());
         /* No actual owner must be set */
 

@@ -54,6 +54,8 @@ import com.htm.taskinstance.WorkItemFactory;
 import com.htm.utils.SessionUtils;
 import com.htm.utils.TaskInstanceTimers;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The implementation of the task parent interface.
@@ -61,13 +63,22 @@ import com.htm.utils.Utilities;
  * @author Sebastian Wagner
  * @author Tobias Unger
  */
+
+@Transactional
 public class TaskParentInterfaceImpl implements TaskParentInterface {
 
-    protected IDataAccessProvider dap;
+    @Autowired
+    protected IDataAccessProvider dataAccessProvider;
 
     protected EventHandler evenHandler;
 
     protected Logger log = Utilities.getLogger(this.getClass());
+
+    @Autowired
+    private TaskInstanceFactory taskInstanceFactory;
+
+    @Autowired
+    private WorkItemFactory workItemFactory;
 
     /**
      * Creates a new {@link TaskParentInterfaceImpl} object.</b> It initializes
@@ -76,7 +87,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
      * {@link TaskInstanceTimers} for more information.
      */
     public TaskParentInterfaceImpl() {
-        this.dap = IDataAccessProvider.Factory.newInstance();
+        //this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
         this.evenHandler = EventHandler.newInstance();
 
         /*
@@ -112,18 +123,18 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
             }
 
             /* Start transaction for creating a task instance */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
             AuthorizationManager.authorizeTaskParentAction(initiatorUserId,
                     null, EActions.CREATE_TASK_INSTANCE);
 
             /* Create the task instance model */
-            TaskInstanceFactory taskFac = TaskInstanceFactory.newInstance();
+            TaskInstanceFactory taskFac = this.taskInstanceFactory;
             ITaskInstance taskInstance = taskFac.createTaskInstance(
                     taskModelName, taskInstanceName, inputData, taskParentId,
                     correlationProperties, expirationTime);
 
             /* Store the task instance instance */
-            dap.persistHumanTaskInstance(taskInstance);
+            dataAccessProvider.persistHumanTaskInstance(taskInstance);
 
             // Audit
             // if (Configuration.isLoggingEnabled()) {
@@ -145,7 +156,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
                 */
             List<IWorkItem> workItems = new ArrayList<IWorkItem>();
 
-            WorkItemFactory workItemFac = WorkItemFactory.newInstance();
+            WorkItemFactory workItemFac = this.workItemFactory;
             /*
                 * A single work item for the task initiator has to be created
                 * because she is not defined in the task model by a people query.
@@ -159,7 +170,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
                 * The attachments should also be added before the other work items
                 * are created then the people queries can refer on the attachments.
                 */
-            taskInstance.setAttachments(TaskInstanceFactory.newInstance()
+            taskInstance.setAttachments(this.taskInstanceFactory
                     .createAssignedUser(initiatorUserId), attachments);
 
             /*
@@ -206,7 +217,7 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
                         + Utilities.formatTimestamp(expirationTime) + "'.");
             }
 
-            dap.persistWorkItems(workItems);
+            dataAccessProvider.persistWorkItems(workItems);
             /* Inform event subscriber about the new work items */
             publishNewWorkItemEvent(workItems);
 
@@ -222,13 +233,13 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
                 auditLogger.logAction(action);
             }
 
-            dap.commitTx();
+            dataAccessProvider.commitTx();
             return taskInstance.getId();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
     }
 
@@ -240,12 +251,12 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
     public void exit(String tiid) throws HumanTaskManagerException {
         try {
             /* Start transaction for creating a task instance */
-            dap.beginTx();
+            dataAccessProvider.beginTx();
             log.debug("Exit task instance - Trying to exit task instance '"
                     + tiid + "'");
             AuthorizationManager.authorizeTaskParentAction(getCurrentUser(),
                     tiid, EActions.EXIT);
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessProvider.getTaskInstance(tiid);
             String oldState = taskInstance.getStatus().toString();
 
             // TODO for skipped, completed, faulted task instances an individual
@@ -274,13 +285,13 @@ public class TaskParentInterfaceImpl implements TaskParentInterface {
                         oldState, SessionUtils.getCurrentUser());
                 auditLogger.logAction(action);
             }
-            dap.commitTx();
+            dataAccessProvider.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessProvider.rollbackTx();
             throw e;
 
         } finally {
-            dap.close();
+            dataAccessProvider.close();
         }
 
     }

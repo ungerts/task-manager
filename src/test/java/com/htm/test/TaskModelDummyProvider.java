@@ -31,6 +31,8 @@ import com.htm.ITaskModelStore;
 import com.htm.TaskModelStore;
 import com.htm.db.DataAccessProviderJpaJUnit;
 import com.htm.db.IDataAccessProvider;
+import com.htm.db.spring.DataAccessRepositoryCustom;
+import com.htm.db.spring.DataAccessRepositoryImpl;
 import com.htm.dm.EHumanRoles;
 import com.htm.exceptions.DatabaseException;
 import com.htm.exceptions.HumanTaskManagerException;
@@ -48,6 +50,7 @@ import com.htm.taskmodel.ModelElementFactory;
 import com.htm.taskmodel.jpa.PeopleQueryArgumentWrapper;
 import com.htm.taskmodel.jpa.PresentationModelWrapper;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public abstract class TaskModelDummyProvider extends UserManagerDummy {
@@ -72,32 +75,16 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
 
     protected static final String MODEL_REPO_ADMIN_PASSWORD = "modelRepoAdminPwd";
 
-    protected DataAccessProviderJpaJUnit dap = getTestDap();
+    @Autowired
+    protected DataAccessRepositoryCustom dataAccessRepository;
 
-    /**
-     * Creates an in-memory database where the test cases are executed on.
-     *
-     * @throws BeansException
-     * @throws SQLException
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
-//	protected void initDataSource() throws BeansException, SQLException, FileNotFoundException, IOException {
+    @Autowired
+    ITaskModelStore taskModelStore;
 
-//        BeanFactory  beanFactory = new XmlBeanFactory(new FileSystemResource(
-//                    "src/test/resources/services-spring.xml"));
-//		
-//        
-//        ScriptRunner runner = new ScriptRunner(
-//                ((DataSource) beanFactory.getBean("dataSource"))
-//                .getConnection(), true, true);
-//        
-//        runner.runScript(new FileReader("setup/htm_derby.sql"));
 
-//	}
     protected void createPeopleGroupDefDummies() throws HumanTaskManagerException {
 
-        ITaskModelStore taskModelStore = new TaskModelStore();
+        ITaskModelStore taskModelStore = this.taskModelStore;
 
         /* People query with multiple arguments. The map contains
                * as key the argument name and as value the argument value */
@@ -133,7 +120,7 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
 
     protected void deleteTaskModelDummies() throws HumanTaskManagerException {
         loginInAsModelRepoAdmin();
-        ITaskModelStore taskModelStore = new TaskModelStore();
+        ITaskModelStore taskModelStore = this.taskModelStore;
         log.debug("Delete task model " + TASK_MODEL_DUMMY_NAME_1 + ":"
                 + taskModelStore.forceDeleteTaskModel(TASK_MODEL_DUMMY_NAME_1));
         log.debug("Delete task model " + TASK_MODEL_DUMMY_NAME_2 + ":"
@@ -142,16 +129,17 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
 
     protected void deleteLpgDummies() throws HumanTaskManagerException {
         loginInAsModelRepoAdmin();
-        ITaskModelStore taskModelStore = new TaskModelStore();
+        ITaskModelStore taskModelStore = this.taskModelStore;
         taskModelStore.deleteLogicalPeopleGroup(LPG_DEF_NAME_DUMMY1);
         taskModelStore.deleteLogicalPeopleGroup(LPG_DEF_NAME_DUMMY2);
         taskModelStore.deleteLogicalPeopleGroup(LPG_DEF_USER_BY_GROUP);
     }
 
 
-    protected DataAccessProviderJpaJUnit getTestDap() {
-        return (DataAccessProviderJpaJUnit) IDataAccessProvider.Factory
-                .newInstance();
+    protected IDataAccessProvider getTestDap() {
+        //return (DataAccessProviderJpaJUnit) IDataAccessProvider.Factory
+        //        .newInstance();
+        return this.dataAccessRepository;
     }
 
 
@@ -219,7 +207,7 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
         taskModel.addPresentationModel(presentationModel);
 
         /* Add model to the task model store */
-        ITaskModelStore taskModelStore = new TaskModelStore();
+        ITaskModelStore taskModelStore = this.taskModelStore;
         taskModelStore.addTaskModel(taskModel);
 
         return taskModel;
@@ -272,7 +260,7 @@ public abstract class TaskModelDummyProvider extends UserManagerDummy {
                 createLiteralDummies(getExcludedOwnersUserIds(), EHumanRoles.EXCLUDED_OWNER));
 
         /* Add model to the task model store */
-        ITaskModelStore taskModelStore = new TaskModelStore();
+        ITaskModelStore taskModelStore = this.taskModelStore;
         taskModelStore.addTaskModel(taskModel);
 
         return taskModel;

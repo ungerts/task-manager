@@ -18,18 +18,16 @@
 
 package com.htm.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.io.StringReader;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.htm.entities.WrappableEntity;
+import com.htm.entities.jpa.*;
+import com.htm.taskinstance.*;
+import com.htm.taskinstance.jpa.*;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
@@ -37,6 +35,11 @@ import org.jdom2.output.XMLOutputter;
 
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.exceptions.UserException;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class Utilities {
 
@@ -80,6 +83,19 @@ public class Utilities {
     public static String getStringFromXMLDoc(Document doc) {
         XMLOutputter out = new XMLOutputter();
         return out.outputString(doc);
+    }
+
+    public static org.w3c.dom.Document getDOMfromString(String xml) throws HumanTaskManagerException {
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        InputSource source = new InputSource(new StringReader(xml));
+        org.w3c.dom.Document document = null;
+        try {
+            document = factory.newDocumentBuilder().parse(source);
+        } catch (Exception e) {
+            throw new HumanTaskManagerException(e.getMessage(), e);
+        }
+        return document;
     }
 
     public static Document getXMLFromString(String xml) {
@@ -218,4 +234,68 @@ public class Utilities {
 
     }
 
+
+    public static IAssignedUser createAssignedUserFromEntity(WrappableEntity assignedUserObject) {
+        if (assignedUserObject == null) {
+            return null;
+        }
+        /*
+           * Check if it is a JPA object that represents the assigned user entity
+           */
+        Utilities.isValidClass(assignedUserObject, Assigneduser.class);
+        return new AssignedUserWrapper((Assigneduser) assignedUserObject);
+    }
+
+    public static ITaskInstance createTaskInstanceFromEntity(WrappableEntity taskInstanceObject) {
+
+        Humantaskinstance taskInstanceEntity = null;
+
+        if (taskInstanceObject instanceof Humantaskinstance) {
+            taskInstanceEntity = (Humantaskinstance) taskInstanceObject;
+            return new TaskInstanceWrapper(taskInstanceEntity);
+
+        } else {
+            throw new RuntimeException("Invalid class error. "
+                    + "Task instance entity object must be of type "
+                    + Humantaskinstance.class);
+        }
+    }
+
+    public static IAttachment createAttachmentFromEntity(WrappableEntity attachmentObject) {
+        Attachment attachmentEntity = null;
+
+        if (attachmentObject instanceof Attachment) {
+            attachmentEntity = (Attachment) attachmentObject;
+            return new AttachmentWrapper(attachmentEntity);
+
+        } else {
+            throw new RuntimeException("Invalid class error. "
+                    + "Attachment entity object must be of type "
+                    + Attachment.class);
+        }
+    }
+
+    public static ICorrelationProperty createCorrelationPropertyFromEntity(WrappableEntity correlationPropsObject) {
+        Callbackcorrelationproperty attachmentEntity = null;
+
+        if (correlationPropsObject instanceof Callbackcorrelationproperty) {
+            attachmentEntity = (Callbackcorrelationproperty) correlationPropsObject;
+            return new CorrelationPropertiesWrapper(attachmentEntity);
+
+        } else {
+            throw new RuntimeException("Invalid class error. "
+                    + "Correlation property entity object must be of type "
+                    + Attachment.class);
+        }
+    }
+
+    public static IFault createFault(String name, Object faultData) {
+        return new FaultImpl(name, faultData);
+    }
+
+    public static IWorkItem createWorkItemFromEntity(Object workItemObject) {
+        Utilities.isValidClass(workItemObject, Workitem.class);
+
+        return new WorkItemWrapper((Workitem) workItemObject);
+    }
 }

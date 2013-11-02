@@ -18,13 +18,6 @@
 
 package com.htm.test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.htm.query.jxpath.XPathUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -54,7 +48,16 @@ import com.htm.taskmodel.ITaskModel;
 import com.htm.taskparent.TaskParentConnectorDummy;
 import com.htm.taskparent.TaskParentContextDummy;
 import com.htm.utils.Utilities;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.Assert.*;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:META-INF/spring-beans.xml")
+@Transactional
 @Ignore
 public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
@@ -64,7 +67,6 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
      * and test data like user, logical people groups and task models are added.
      *
      * @throws HumanTaskManagerException
-     * @throws BeansException
      * @throws FileNotFoundException
      * @throws SQLException
      * @throws IOException
@@ -75,7 +77,7 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
         try {
             cleanUp();
             /* Create transaction boundaries */
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             /*
                 * Create LPG definition dummies and the task model dummy where the
                 * task instance is created from.
@@ -85,13 +87,13 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
             createTaskModelDummyLiterals(TASK_MODEL_DUMMY_NAME_2);
             /* Create dummy users and groups */
             createDummyUsersAndGroups();
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
 
         } catch (DatabaseException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -109,16 +111,16 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
     public void cleanUp() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             deleteModelDummies();
             deleteDummyUsersAndGroups();
             deleteInstanceData();
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (DatabaseException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -136,7 +138,7 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
     public void createTaskInstance() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
 
             /* Set the the user name and password in the security context of spring */
             initSecurityContext(TASK_INITIATOR_USER_ID, TASK_INITIATOR_PASSWORD);
@@ -147,7 +149,7 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
             Timestamp expirationTime = new Timestamp(Calendar.getInstance()
                     .getTimeInMillis() + 5000);
-            TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+            TaskParentInterface partenInterface = this.taskParentInterface;
             /* Create task instance */
             String tiid = partenInterface.createTaskInstance(TaskParentConnectorDummy.TASK_PARENT_ID, getCorrelationPropertyDummies(),
                     TASK_MODEL_DUMMY_NAME_1, TASK_INSTANCE_DUMMY_NAME1,
@@ -155,8 +157,8 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
             /* Time after creation required for assertions */
             long timeAfterTiCreation = Calendar.getInstance().getTimeInMillis();
 
-            ITaskModel taskModel = dap.getHumanTaskModel(TASK_MODEL_DUMMY_NAME_1);
-            ITaskInstance resultTaskInstance = dap.getTaskInstance(tiid);
+            ITaskModel taskModel = dataAccessRepository.getHumanTaskModel(TASK_MODEL_DUMMY_NAME_1);
+            ITaskInstance resultTaskInstance = dataAccessRepository.getTaskInstance(tiid);
 
             /*
                 * Assertions
@@ -189,12 +191,20 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
                 * etc. in the class TaskInstanceDummyProvider. The evaluation
                 * context is defined in the class TaskParentContextDummy
                 */
-            assertEquals(Integer.valueOf(TaskParentContextDummy.PRIORITY)
+            assertEquals("Compare priority.", Integer.valueOf(TaskParentContextDummy.PRIORITY)
                     .intValue(), resultTaskInstance.getPriority());
-            assertEquals(Long.valueOf(TaskParentContextDummy.STARTBY).longValue(), resultTaskInstance
-                    .getStartBy().getTime());
-            assertEquals(Long.valueOf(TaskParentContextDummy.COMPLETEBY).longValue(), resultTaskInstance
-                    .getCompleteBy().getTime());
+            try {
+                assertEquals(XPathUtils.getTimestampFromString(TaskParentContextDummy.STARTBY), resultTaskInstance
+                        .getStartBy());
+            } catch (Exception e) {
+               fail(e.getMessage());
+            }
+            try {
+                assertEquals(XPathUtils.getTimestampFromString(TaskParentContextDummy.COMPLETEBY), resultTaskInstance
+                        .getCompleteBy());
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
             assertEquals(new Boolean(TaskParentContextDummy.SKIPABLE),
                     resultTaskInstance.isSkipable());
 
@@ -230,12 +240,12 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
             assertEquals(ETaskInstanceState.READY, resultTaskInstance.getStatus());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -252,9 +262,9 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
     public void createTaskInstance1() throws HumanTaskManagerException {
 
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
 
-            TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+            TaskParentInterface partenInterface = this.taskParentInterface;
 
             /* Set the the user name and password in the security context */
             initSecurityContext(TASK_INITIATOR_USER_ID, TASK_INITIATOR_PASSWORD);
@@ -264,8 +274,8 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
                     TASK_MODEL_DUMMY_NAME_2, TASK_INSTANCE_DUMMY_NAME1,
                     null, null, null);
 
-            dap.getHumanTaskModel(TASK_MODEL_DUMMY_NAME_1);
-            ITaskInstance resultTaskInstance = dap.getTaskInstance(tiid);
+            dataAccessRepository.getHumanTaskModel(TASK_MODEL_DUMMY_NAME_1);
+            ITaskInstance resultTaskInstance = dataAccessRepository.getTaskInstance(tiid);
 
             /*
                 * Assertions
@@ -313,12 +323,12 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
 
             assertEquals(ETaskInstanceState.READY, resultTaskInstance.getStatus());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -326,21 +336,21 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
     @Test
     public void exitOperation() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
 
-            TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+            TaskParentInterface partenInterface = this.taskParentInterface;
             partenInterface.exit(tiid);
 
-            ITaskInstance taskInstance = dap.getTaskInstance(tiid);
+            ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             assertEquals(ETaskInstanceState.EXITED, taskInstance.getStatus());
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
@@ -353,10 +363,10 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
     @Test(expected = IllegalArgumentException.class)
     public void exitObsoleteTaskInstance() throws HumanTaskManagerException {
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
             String tiid = createTaskInstanceDummy();
 
-            TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+            TaskParentInterface partenInterface = this.taskParentInterface;
 
             /* The task instance has to be skipped to go into the obsolete state */
             ITaskClientInterface taskClient = new TaskClientInterfaceImpl();
@@ -365,19 +375,19 @@ public class TaskParentInterfaceTest extends TaskInstanceDummyProvider {
             /* Then try to exit the skipped task instance, an exception is expected */
             partenInterface.exit(tiid);
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 
 
     protected void deleteInstanceData() throws DatabaseException {
-        dap.deleteAllWorkItems();
-        dap.deleteAllTaskInstances();
+        dataAccessRepository.deleteAllWorkItems();
+        dataAccessRepository.deleteAllTaskInstances();
     }
 
     protected void assertUsers(String[] expectedUserIds, Set<String> resultUserIds) {

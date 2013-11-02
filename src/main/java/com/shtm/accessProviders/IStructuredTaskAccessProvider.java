@@ -43,7 +43,7 @@ public interface IStructuredTaskAccessProvider {
             // */
             // if (sdap == null) {
             // if (JUNIT_TEST) {
-            // // dap = new StructureDataAccessProviderJpaJUnit();
+            // // dataAccessProvider = new StructureDataAccessProviderJpaJUnit();
             // } else {
             // sdap = StructuredTaskAccessProviderJPA.newInstance();
             // }

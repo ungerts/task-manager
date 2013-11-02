@@ -39,7 +39,13 @@ import com.htm.taskmodel.IPeopleQueryArgument;
 import com.htm.taskmodel.ModelElementFactory;
 import com.htm.taskmodel.jpa.LpgGroupArgDefWrapper;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component("userByGroup")
+@Transactional
 public class LpgResolutionProvider_UserByGroup implements IPeopleResolutionProvider {
 
     public static ILogicalPeopleGroupDef SUPPORTED_LPG_DEF;
@@ -63,6 +69,9 @@ public class LpgResolutionProvider_UserByGroup implements IPeopleResolutionProvi
         SUPPORTED_LPG_DEF.addArgumentDefinition(lpgArgDef);
 
     }
+
+    @Autowired
+    private IDataAccessProvider dataAccessProvider;
 
 
     public PeopleAssignmentResult executePeopleQuery(IPeopleAssignment peopleQuery, Object context) throws HumanTaskManagerException {
@@ -109,7 +118,7 @@ public class LpgResolutionProvider_UserByGroup implements IPeopleResolutionProvi
     //actual staff verb
     protected Set<String> getUsersByGroupMembership(String groupName) throws DatabaseException {
         log.debug("People query evaluation - Trying to retrieve users for group '" + groupName + "'.");
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessProvider;
         Set<String> users = dap.getUserIdsByGroup(groupName);
         log.debug("People query evaluation - The following users were retrieved '" + users.toArray() + "'.");
 

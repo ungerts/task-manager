@@ -20,7 +20,7 @@
 <persistence version="2.0"
              xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-    <persistence-unit name="HumanTaskManager">
+    <persistence-unit name="HumanTaskManager" transaction-type="RESOURCE_LOCAL">
         <!-- <jta-data-source>jdbc/taskmanager</jta-data-source>      -->
         <class>com.htm.entities.jpa.Workitemtaskview</class>
         <class>com.htm.entities.jpa.UsersGroupsPK</class>
@@ -40,14 +40,14 @@
         <class>com.htm.entities.jpa.Attachment</class>
         <class>com.htm.entities.jpa.Assigneduser</class>
         <class>com.shtm.structureClasses.StructureData</class>
-        <class>com.allweathercomputing.htm.org.Person</class>
-        <class>com.allweathercomputing.htm.org.Role</class>
-        <class>com.allweathercomputing.htm.org.Organization</class>
         <class>com.htm.audit.AuditEntry</class>
-       <!-- <properties>
-            <property name="eclipselink.ddl-generation.output-mode" value="sql-script"/>
-            <property name="eclipselink.application-location"
-                      value="C:\odeschool\workspaces\taskmanager_test\TaskManagerTest\misc"/>
-        </properties> -->
+        <!--properties>
+            <property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+            <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+            <property name="eclipselink.application-location" value="/Users/ungerts/IdeaProjects/task-manager/"/>
+            <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql" />
+            <property name="eclipselink.drop-ddl-jdbc-file-name" value="drop.sql"/>
+
+        </properties-->
     </persistence-unit>
 </persistence>

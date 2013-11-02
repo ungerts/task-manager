@@ -27,7 +27,10 @@ import com.htm.userdirectory.IGroup;
 import com.htm.userdirectory.IUser;
 import com.htm.userdirectory.UserDirectoryFactory;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class UserManagerBasicImpl implements IUserManager {
 
     public final static String ADMIN_ROLE = "admin";
@@ -40,12 +43,13 @@ public class UserManagerBasicImpl implements IUserManager {
 
     protected final String ADMIN_CREDENTIAL = DUMMY_ADMIN_USERNAME.concat(CREDENTIAL_DELIMITER).concat(DUMMY_ADMIN_PASSWORD);
 
-    protected IDataAccessProvider dap;
+    @Autowired
+    protected IDataAccessProvider dataAccessProvider;
 
     protected Logger log;
 
     public UserManagerBasicImpl() {
-        this.dap = IDataAccessProvider.Factory.newInstance();
+        this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
         this.log = Utilities.getLogger(this.getClass());
     }
 
@@ -55,7 +59,7 @@ public class UserManagerBasicImpl implements IUserManager {
 
         IUser user = UserDirectoryFactory.newInstance().createNewUser(
                 userId, firstName, lastName, password);
-        dap.persistUser(user);
+        dataAccessProvider.persistUser(user);
 
         return user;
     }
@@ -64,7 +68,7 @@ public class UserManagerBasicImpl implements IUserManager {
         AuthorizationManager.authorizeAdministrativeAction(EActions.CHANGE_PASSWORD);
 
         /* Get the user model from the database and set the new pasword */
-        IUser user = dap.getUser(userId);
+        IUser user = dataAccessProvider.getUser(userId);
         if (user != null) {
             user.setPassword(newpassword);
             return true;
@@ -75,7 +79,7 @@ public class UserManagerBasicImpl implements IUserManager {
     public boolean deleteUser(String userId) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_USER);
 
-        return dap.deleteUser(userId);
+        return dataAccessProvider.deleteUser(userId);
 
     }
 
@@ -83,7 +87,7 @@ public class UserManagerBasicImpl implements IUserManager {
         AuthorizationManager.authorizeAdministrativeAction(EActions.ADD_GROUP);
         /* Create group model and persist it */
         IGroup group = UserDirectoryFactory.newInstance().createNewGroup(groupName);
-        dap.persistGroup(group);
+        dataAccessProvider.persistGroup(group);
 
         return group;
     }
@@ -91,19 +95,19 @@ public class UserManagerBasicImpl implements IUserManager {
     public boolean deleteGroup(String groupName) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_GROUP);
 
-        return dap.deleteGroup(groupName);
+        return dataAccessProvider.deleteGroup(groupName);
     }
 
     public IGroup getGroup(String groupName) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_GROUP);
         /* Check if the passed credentials are correct */
-        return dap.getGroup(groupName);
+        return dataAccessProvider.getGroup(groupName);
 
     }
 
     public IUser getUser(String userId) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_USER);
-        return dap.getUser(userId);
+        return dataAccessProvider.getUser(userId);
 
     }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.htm.taskinstance.TaskInstanceFactory;
 import org.apache.log4j.Logger;
 
 
@@ -30,6 +31,7 @@ import com.htm.security.IUserManager;
 import com.htm.userdirectory.IGroup;
 import com.htm.userdirectory.IUser;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class UserManagerDummy extends SecurityContextInitializer {
 
@@ -54,10 +56,16 @@ public class UserManagerDummy extends SecurityContextInitializer {
     public static final String USER_MANAGER_ID = "admin";
 
     public static final String USER_MANAGER_PASSWORD = "admin";
+    
+    @Autowired
+    protected IUserManager iUserManager;
+
+    @Autowired
+    protected TaskInstanceFactory taskInstanceFactory;
 
     protected void createDummyUsersAndGroups() throws HumanTaskManagerException {
 
-        IUserManager um = IUserManager.Factory.newInstance();
+        IUserManager um = this.iUserManager;
 
         /* Create Groups users.add(user); */
         IGroup interns = um.addGroup(GROUP_DUMMY_INTERNS);
@@ -80,8 +88,8 @@ public class UserManagerDummy extends SecurityContextInitializer {
         workOnDevs.addMember(user);
         employees.addMember(user);
         dummyUsers.add(user);
-
-        user = IUserManager.Factory.newInstance().addUser(
+        
+        user = this.iUserManager.addUser(
                 "lokanava", "Vanchin", "Lokanathan", USER_PASSWORD);
         workOnDevs.addMember(user);
         employees.addMember(user);
@@ -91,7 +99,7 @@ public class UserManagerDummy extends SecurityContextInitializer {
         employees.addMember(user);
         dummyUsers.add(user);
 
-        user = IUserManager.Factory.newInstance().addUser("gallemel", "Melanie", "Galle", USER_PASSWORD);
+        user = this.iUserManager.addUser("gallemel", "Melanie", "Galle", USER_PASSWORD);
         interns.addMember(user);
         employees.addMember(user);
         dummyUsers.add(user);
@@ -101,7 +109,7 @@ public class UserManagerDummy extends SecurityContextInitializer {
         employees.addMember(user);
         dummyUsers.add(user);
 
-        user = IUserManager.Factory.newInstance().addUser(
+        user = this.iUserManager.addUser(
                 "wagnerse", "Sebastian", "Wagner", USER_PASSWORD);
         interns.addMember(user);
         employees.addMember(user);
@@ -120,11 +128,11 @@ public class UserManagerDummy extends SecurityContextInitializer {
     }
 
     protected IUserManager getUserManager() {
-        return IUserManager.Factory.newInstance();
+        return this.iUserManager;
     }
 
     protected void deleteDummyUsersAndGroups() throws HumanTaskManagerException {
-        IUserManager um = IUserManager.Factory.newInstance();
+        IUserManager um = this.iUserManager;
 
         /* Set the the user name and password in the security context of spring */
         initSecurityContext(USER_MANAGER_ID, USER_MANAGER_PASSWORD);

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.htm.db.IDataAccessProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -49,6 +50,10 @@ import com.htm.taskmodel.IPresentationModel;
 import com.htm.taskmodel.ITaskModel;
 import com.htm.taskmodel.ModelElementFactory;
 import com.htm.utils.Utilities;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A JUnit implementation of the DataAccessProvider has to be used since the tested methods
@@ -56,6 +61,9 @@ import com.htm.utils.Utilities;
  *
  * @author sew71sgp
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:META-INF/spring-beans.xml")
+@Transactional
 @Ignore
 public class TaskModelRepositoryTest extends TaskModelDummyProvider {
 
@@ -64,33 +72,33 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
     public void before() throws HumanTaskManagerException, FileNotFoundException, SQLException, IOException {
         cleanUp();
 
-        DataAccessProviderJpaJUnit dap = getTestDap();
+        IDataAccessProvider dap = getTestDap();
         try {
             /* Create transaction boundaries */
             dap.beginTx();
             createPeopleGroupDefDummies();
-            dap.commitTestCase();
+            dap.commitTx();
 
         } catch (DatabaseException e) {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
     }
 
     @After
     public void cleanUp() throws HumanTaskManagerException {
-        DataAccessProviderJpaJUnit dap = getTestDap();
+        IDataAccessProvider dap = getTestDap();
         try {
             dap.beginTx();
             deleteModelDummies();
-            dap.commitTestCase();
+            dap.commitTx();
         } catch (DatabaseException e) {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
 
     }
@@ -100,15 +108,15 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
      * Method {@link ITaskModelStore#addTaskModel(ITaskModel)} is tested.</br>
      * Remark: The following methods are tested implicitly by the <code>before</code> or <code>cleanUp</code> method:</br>
      * {@link ITaskModelStore#deleteTaskModel(String)}</br>
-     * {@link ITaskModelStore#addLogicalPeopleGroupDef(com.htm.dm.taskmodel.ILogicalPeopleGroupDef)}</br>
+     * </br>
      * {@link ITaskModelStore#deleteLogicalPeopleGroup(String)}</br>
      *
      * @throws DatabaseException
-     * @see comhtm.htm.test.TaskModelRepositoryTest.cleanUp
+     * @see com.htm.test.TaskModelRepositoryTest
      */
     @Test
     public void test_addTaskModels() throws HumanTaskManagerException {
-        DataAccessProviderJpaJUnit dap = getTestDap();
+        IDataAccessProvider dap = getTestDap();
         try {
             dap.beginTx();
 
@@ -120,12 +128,12 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
             taskModelStore.addTaskModel(dummyTaskModel1);
             taskModelStore.addTaskModel(dummyTaskModel2);
 
-            dap.commitTestCase();
+            dap.commitTx();
         } catch (DatabaseException e) {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
 
     }
@@ -147,7 +155,7 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
     @Test
     public void test_getTaskModel() throws HumanTaskManagerException {
 
-        DataAccessProviderJpaJUnit dap = getTestDap();
+        IDataAccessProvider dap = getTestDap();
         try {
             dap.beginTx();
 
@@ -155,12 +163,13 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
                 * Add a dummy task model to the model store and after that fetch it
                 * from the model store.
                 */
-            ITaskModelStore taskModelStore = new TaskModelStore();
+            ITaskModelStore taskModelStore = this.taskModelStore;
+
             ITaskModel expectedTaskModel = createTaskModelDummyLPG(TASK_MODEL_DUMMY_NAME_1);
             taskModelStore.addTaskModel(expectedTaskModel);
             ITaskModel resultTaskModel = taskModelStore.getTaskModel(TASK_MODEL_DUMMY_NAME_1);
 
-            dap.commitTestCase();
+            dap.commitTx();
 
             /*
                 * Check if the task model attributes of the dummy and the result
@@ -209,7 +218,7 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
 
     }
@@ -217,7 +226,7 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
     @Test
     public void test_getTaskModelWithLiterals() throws HumanTaskManagerException {
 
-        DataAccessProviderJpaJUnit dap = getTestDap();
+        IDataAccessProvider dap = getTestDap();
         try {
             dap.beginTx();
 
@@ -225,12 +234,12 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
                 * Add a dummy task model to the model store and after that fetch it
                 * from the model store.
                 */
-            ITaskModelStore taskModelStore = new TaskModelStore();
+            ITaskModelStore taskModelStore = this.taskModelStore;
             ITaskModel expectedTaskModel = createTaskModelDummyLiterals(TASK_MODEL_DUMMY_NAME_2);
             taskModelStore.addTaskModel(expectedTaskModel);
             ITaskModel resultTaskModel = taskModelStore.getTaskModel(TASK_MODEL_DUMMY_NAME_2);
 
-            dap.commitTestCase();
+            dap.commitTx();
 
             /*
                 * Check if the task model attributes of the dummy and the result
@@ -257,7 +266,7 @@ public class TaskModelRepositoryTest extends TaskModelDummyProvider {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
 
     }

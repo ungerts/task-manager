@@ -29,9 +29,9 @@ import com.htm.taskinstance.jpa.TaskInstanceFactoryJPA;
 
 public abstract class TaskInstanceFactory {
 
-    public static TaskInstanceFactory newInstance() {
-        return new TaskInstanceFactoryJPA();
-    }
+    //public static TaskInstanceFactory newInstance() {
+    //    return new TaskInstanceFactoryJPA();
+    //}
 
     //TODO optional attributes like actual people, priority, expire
 

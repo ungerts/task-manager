@@ -172,7 +172,7 @@ public class XPathUtils {
     }
 
     // TODO parse time from number
-    private static Timestamp getTimestampFromString(String object)
+    public static Timestamp getTimestampFromString(String object)
             throws Exception {
         try {
             DatatypeFactory df = DatatypeFactory.newInstance();

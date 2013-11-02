@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.htm.db;
+package com.htm.db.spring;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -27,11 +27,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.SessionContext;
+//import javax.ejb.SessionContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import com.htm.db.IDataAccessProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -60,10 +62,13 @@ import com.htm.taskmodel.ModelElementFactory;
 import com.htm.userdirectory.IGroup;
 import com.htm.userdirectory.IUser;
 import com.htm.userdirectory.UserDirectoryFactory;
-import com.htm.utils.JEEUtils;
+//import com.htm.utils.JEEUtils;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
-public class JEEDatabaseAccessProvider implements IDataAccessProvider {
+@Transactional
+public class DataAccessRepositoryImpl implements DataAccessRepositoryCustom {
 
     // public static final boolean CLOSE_ON_COMMIT = true;
     // public static final boolean CLOSE_ON_ROLLBACK = true;
@@ -73,9 +78,10 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
 
     // private static JEEDatabaseAccessProvider dapInstance;
 
+    @PersistenceContext
     protected EntityManager em;
 
-    protected SessionContext ctx;
+    //protected SessionContext ctx;
 
     // protected EntityManagerFactory emf;
 
@@ -83,15 +89,18 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
 
     protected Logger log;
 
-    public JEEDatabaseAccessProvider(EntityManager em, SessionContext ctx) {
-        // this.emf =
-        // Persistence.createEntityManagerFactory("HumanTaskManager");
-        this.em = em;
-        this.ctx = ctx;
-        this.log = Utilities.getLogger(this.getClass());
-    }
+    @Autowired
+    private  TaskInstanceFactory taskInstanceFactory;
 
-    public JEEDatabaseAccessProvider() {
+    //public JEEDatabaseAccessProvider(EntityManager em, SessionContext ctx) {
+    //    // this.emf =
+    //    // Persistence.createEntityManagerFactory("HumanTaskManager");
+    //    this.em = em;
+    //    this.ctx = ctx;
+    //    this.log = Utilities.getLogger(this.getClass());
+    //}
+
+    public DataAccessRepositoryImpl() {
         this.log = Utilities.getLogger(this.getClass());
         // try {
         // InitialContext ctx = new InitialContext();
@@ -100,14 +109,23 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
         // e.printStackTrace();
         // }
 
-        this.em = JEEUtils.getEntityManager(JEEUtils.PERSISTENCE_MANAGER_HTM);
-        this.ctx = JEEUtils.getSessionContext();
+        //this.em = JEEUtils.getEntityManager(JEEUtils.PERSISTENCE_MANAGER_HTM);
+        //this.ctx = JEEUtils.getSessionContext();
     }
 
-    public static JEEDatabaseAccessProvider newInstance() {
-
-        return new JEEDatabaseAccessProvider();
+    /**
+     * Configure the entity manager to be used.
+     *
+     * @param em the {@link EntityManager} to set.
+     */
+    public void setEntityManager(EntityManager em) {
+        this.em = em;
     }
+
+    //public static SpringDatabaseAccessProvider newInstance() {
+    //
+    //    return new SpringDatabaseAccessProvider();
+    //}
 
     // Only for testing purposes
     /*
@@ -169,7 +187,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
         // if (isTxActive()) {
         // tx.rollback();
         // }
-        ctx.setRollbackOnly();
+        //ctx.setRollbackOnly();
     }
 
     /*
@@ -436,7 +454,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
             }
 
             /* Build model of the human task instance and return it */
-            return TaskInstanceFactory.newInstance()
+            return this.taskInstanceFactory
                     .createTaskInstanceFromEntity(taskInstanceEntity);
 
         } catch (DatabaseException e) {
@@ -474,7 +492,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
             Workitem workItemEntity = (Workitem) executeSingleResultQuery(query);
 
             /* Build model of the human task instance and return it */
-            return WorkItemFactory.newInstance().createWorkItemFromEntity(
+            return Utilities.createWorkItemFromEntity(
                     workItemEntity);
 
         } catch (Exception e) {
@@ -542,8 +560,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
                      * Build model of the work item and add it to the list that is
                      * to returned
                      */
-                IWorkItem workItem = WorkItemFactory.newInstance()
-                        .createWorkItemFromEntity((Workitem) iter.next());
+                IWorkItem workItem = Utilities.createWorkItemFromEntity((Workitem) iter.next());
                 workItems.add(workItem);
             }
         }
@@ -602,6 +619,8 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
         return executeUpdate(query);
     }
 
+
+    //@Transactional
     public boolean deleteAllWorkItems() throws DatabaseException {
         Query query = em.createQuery("DELETE FROM Workitem wi");
         return executeUpdate(query);
@@ -673,7 +692,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
             Assigneduser assignedUserEntity = (Assigneduser) executeSingleResultQuery(query);
 
             if (assignedUserEntity != null) {
-                return TaskInstanceFactory.newInstance()
+                return this.taskInstanceFactory
                         .createAssignedUserFromEntity(assignedUserEntity);
             }
 
@@ -1046,7 +1065,7 @@ public class JEEDatabaseAccessProvider implements IDataAccessProvider {
 
         Iterator<?> iter = taskInstanceEntities.iterator();
         while (iter.hasNext()) {
-            taskInstances.add(TaskInstanceFactory.newInstance()
+            taskInstances.add(this.taskInstanceFactory
                     .createTaskInstanceFromEntity(
                             (Humantaskinstance) iter.next()));
         }

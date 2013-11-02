@@ -21,13 +21,13 @@ package com.shtm.test;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import com.htm.db.spring.DataAccessRepositoryCustom;
 import junit.framework.Assert;
 
 import com.htm.ITaskClientInterface;
 import com.htm.TaskClientInterfaceImpl;
 import com.htm.TaskParentInterface;
 import com.htm.TaskParentInterfaceImpl;
-import com.htm.db.DataAccessProviderJpaJUnit;
 import com.htm.exceptions.DatabaseException;
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.taskparent.TaskParentConnectorDummy;
@@ -42,10 +42,10 @@ import org.junit.Ignore;
 @Ignore
 public class StructureDataTestUtilities extends TaskParentInterfaceTest {
     protected ITaskClientInterface taskClient = new TaskClientInterfaceImpl();
-    public DataAccessProviderJpaJUnit dap;
+    public DataAccessRepositoryCustom dap;
 
     public StructureDataTestUtilities() {
-        dap = super.dap;
+        dap = super.dataAccessRepository;
     }
 
     public void createModell() throws HumanTaskManagerException {
@@ -70,13 +70,13 @@ public class StructureDataTestUtilities extends TaskParentInterfaceTest {
             /* Create dummy users and groups */
             createDummyUsersAndGroups();
 
-            dap.commitTestCase();
+            dap.commitTx();
 
         } catch (DatabaseException e) {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
     }
 
@@ -117,7 +117,7 @@ public class StructureDataTestUtilities extends TaskParentInterfaceTest {
             deleteModelDummies();
             deleteDummyUsersAndGroups();
             deleteInstanceData();
-            dap.commitTestCase();
+            dap.commitTx();
 
 
         } catch (DatabaseException e) {
@@ -127,7 +127,7 @@ public class StructureDataTestUtilities extends TaskParentInterfaceTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
 
     }
@@ -167,13 +167,13 @@ public class StructureDataTestUtilities extends TaskParentInterfaceTest {
             TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
             partenInterface.exit(tiid);
 
-            dap.commitTestCase();
+            dap.commitTx();
 
         } catch (DatabaseException e) {
             dap.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dap.close();
         }
     }
 

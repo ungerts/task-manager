@@ -21,36 +21,45 @@ package com.htm.taskparent;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jdom2.Document;
 
+import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.taskinstance.ITaskParentContext;
 import com.htm.utils.Utilities;
 
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+
 public class TaskParentContextDummy implements ITaskParentContext {
+
+    private static final Logger log = Utilities.getLogger(TaskParentContextDummy.class);
 
     public static final String PROCESS_VARIABLES = "humanTask";
 
     public static final String PRIORITY = "1";
 
-    public static final String STARTBY = "1249622420945";
+    public static final String STARTBY = "2014-04-12T13:20:00Z";
 
-    public static final String COMPLETEBY = "1249642420945";
+    public static final String COMPLETEBY = "2015-04-12T13:20:00Z";
 
     public static final String SKIPABLE = "true";
 
-    private Map<String, Document> properties = new HashMap<String, Document>();
+    private Document properties;
 
     public TaskParentContextDummy() {
-        properties.put(PROCESS_VARIABLES, Utilities.getXMLFromString(
-                "<infos>" +
-                        "<priority>" + PRIORITY + "</priority>" +
-                        "<skipable>" + SKIPABLE + "</skipable>" +
-                        "<startBy>" + STARTBY + "</startBy>" +
-                        "<completeBy>" + COMPLETEBY + "</completeBy>" +
-                        "</infos>"));
+        try {
+            properties = Utilities.getDOMfromString(
+                    "<infos>" +
+                            "<priority>" + PRIORITY + "</priority>" +
+                            "<skipable>" + SKIPABLE + "</skipable>" +
+                            "<startBy>" + STARTBY + "</startBy>" +
+                            "<completeBy>" + COMPLETEBY + "</completeBy>" +
+                            "</infos>");
+        } catch (HumanTaskManagerException e) {
+            log.warn("Cannot initialize properties!", e);
+        }
     }
 
-    public Map<String, Document> getProperties() {
+    public Document getProperties() {
         return properties;
     }
 

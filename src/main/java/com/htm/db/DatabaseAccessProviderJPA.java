@@ -411,7 +411,7 @@ public class DatabaseAccessProviderJPA implements IDataAccessProvider {
                     (Humantaskinstance) executeSingleResultQuery(query);
 
             /* Build model of the human task instance and return it */
-            return TaskInstanceFactory.newInstance().createTaskInstanceFromEntity(taskInstanceEntity);
+            return Utilities.createTaskInstanceFromEntity(taskInstanceEntity);
 
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -443,7 +443,7 @@ public class DatabaseAccessProviderJPA implements IDataAccessProvider {
             Workitem workItemEntity = (Workitem) executeSingleResultQuery(query);
 
             /* Build model of the human task instance and return it */
-            return WorkItemFactory.newInstance().createWorkItemFromEntity(
+            return Utilities.createWorkItemFromEntity(
                     workItemEntity);
 
         } catch (Exception e) {
@@ -506,7 +506,7 @@ public class DatabaseAccessProviderJPA implements IDataAccessProvider {
                      * Build model of the work item and add it to the list that
                      * is to returned
                      */
-                IWorkItem workItem = WorkItemFactory.newInstance()
+                IWorkItem workItem = Utilities
                         .createWorkItemFromEntity((Workitem) iter.next());
                 workItems.add(workItem);
             }
@@ -620,7 +620,7 @@ public class DatabaseAccessProviderJPA implements IDataAccessProvider {
             Assigneduser assignedUserEntity = (Assigneduser) executeSingleResultQuery(query);
 
             if (assignedUserEntity != null) {
-                return TaskInstanceFactory.newInstance().createAssignedUserFromEntity(
+                return Utilities.createAssignedUserFromEntity(
                         assignedUserEntity);
             }
 
@@ -976,7 +976,7 @@ public class DatabaseAccessProviderJPA implements IDataAccessProvider {
 
         Iterator<?> iter = taskInstanceEntities.iterator();
         while (iter.hasNext()) {
-            taskInstances.add(TaskInstanceFactory.newInstance().createTaskInstanceFromEntity(
+            taskInstances.add(Utilities.createTaskInstanceFromEntity(
                     (Humantaskinstance) iter.next()));
         }
 

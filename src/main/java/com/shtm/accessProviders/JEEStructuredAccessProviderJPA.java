@@ -21,7 +21,7 @@ package com.shtm.accessProviders;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.SessionContext;
+//import javax.ejb.SessionContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.query.views.WorkItemView;
-import com.htm.utils.JEEUtils;
+//import com.htm.utils.JEEUtils;
 import com.htm.utils.Utilities;
 import com.shtm.exceptions.SHTMDataBaseException;
 import com.shtm.structureClasses.StructureData;
@@ -57,15 +57,15 @@ public class JEEStructuredAccessProviderJPA implements
 
     protected Logger log;
 
-    private SessionContext ctx;
+    //private SessionContext ctx;
 
-    protected JEEStructuredAccessProviderJPA() {
-        // this.emf = Persistence
-        // .createEntityManagerFactory("StructureDataManager");
-        this.em = JEEUtils.getEntityManager(JEEUtils.PERSISTENCE_MANAGER_SHTM);
-        this.ctx = JEEUtils.getSessionContext();
-        this.log = Utilities.getLogger(this.getClass());
-    }
+    //protected JEEStructuredAccessProviderJPA() {
+    //    // this.emf = Persistence
+    //    // .createEntityManagerFactory("StructureDataManager");
+    //    this.em = JEEUtils.getEntityManager(JEEUtils.PERSISTENCE_MANAGER_SHTM);
+    //    this.ctx = JEEUtils.getSessionContext();
+    //    this.log = Utilities.getLogger(this.getClass());
+    //}
 
     public static JEEStructuredAccessProviderJPA newInstance() {
 
@@ -141,7 +141,7 @@ public class JEEStructuredAccessProviderJPA implements
 
         /* Only active transactions can be rolled back */
         if (isTxActive()) {
-            ctx.setRollbackOnly();
+        //    ctx.setRollbackOnly();
         }
     }
 

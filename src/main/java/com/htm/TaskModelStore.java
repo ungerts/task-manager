@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.htm.db.spring.DataAccessRepositoryCustom;
 import org.apache.log4j.Logger;
 
 import com.htm.db.IDataAccessProvider;
@@ -35,6 +36,7 @@ import com.htm.taskinstance.IWorkItem;
 import com.htm.taskmodel.ILogicalPeopleGroupDef;
 import com.htm.taskmodel.ITaskModel;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class TaskModelStore implements ITaskModelStore {
@@ -42,10 +44,13 @@ public class TaskModelStore implements ITaskModelStore {
     //TODO Check credentials
     private Logger log = Utilities.getLogger(this.getClass());
 
+    @Autowired
+    private DataAccessRepositoryCustom dataAccessRepository;
+
 
     public void addTaskModel(ITaskModel taskModel) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.ADD_TASK_MODEL);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         try {
             dap.beginTx();
@@ -68,7 +73,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public boolean deleteTaskModel(String modelName, boolean forceDelete) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_TASK_MODEL);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         boolean isDeleted = false;
         try {
             dap.beginTx();
@@ -105,7 +110,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     protected void deleteTaskInstances(ITaskModel taskModel) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_TASK_INSTANCES);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         if (taskModel != null) {
             /* Delete all task instances that are instantiated from the task model.
@@ -127,7 +132,7 @@ public class TaskModelStore implements ITaskModelStore {
     protected void deleteWorkItems(ITaskInstance taskInstance)
             throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_WORK_ITEM);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         if (taskInstance != null) {
             /* Delete all work items that are associated to the task instance. */
@@ -142,7 +147,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public List<ITaskModel> getTaskModels() throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_TASK_MODELS);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         List<ITaskModel> taskModels = null;
 
         try {
@@ -160,7 +165,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public Set<String> getTaskModelNames() throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_TASK_MODEL_NAMES);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         Set<String> taskModelNames = null;
 
         try {
@@ -179,7 +184,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public boolean updateTaskModel(String modelName, ITaskModel newTaskModel) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.UPDATE_TASK_MODEL);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         try {
             /*
@@ -222,7 +227,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public void addLogicalPeopleGroupDef(ILogicalPeopleGroupDef lpgDef) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.ADD_LPG_DEFINITION);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         try {
             dap.beginTx();
@@ -239,7 +244,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public boolean deleteLogicalPeopleGroup(String lpgDefName) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.DELETE_LPG_DEFINITION);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         boolean isDeleted = false;
         try {
             dap.beginTx();
@@ -267,7 +272,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public boolean updateLogicalPeopleGroupDef(String lpgDefName, ILogicalPeopleGroupDef newLpgDef) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.UPDATE_LPG_DEFINITION);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
 
         try {
             /*
@@ -299,7 +304,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public ITaskModel getTaskModel(String name) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_TASK_MODEL);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         ITaskModel taskModel = null;
 
         try {
@@ -318,7 +323,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public ILogicalPeopleGroupDef getLogicalPeopleGroupDef(String name) throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_LOGICAL_PEOPLE_GROUP_DEF);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         ILogicalPeopleGroupDef lpgDef = null;
 
         try {
@@ -336,7 +341,7 @@ public class TaskModelStore implements ITaskModelStore {
 
     public List<ILogicalPeopleGroupDef> getLogicalPeopleGroupDefs() throws HumanTaskManagerException {
         AuthorizationManager.authorizeAdministrativeAction(EActions.GET_TASK_MODELS);
-        IDataAccessProvider dap = IDataAccessProvider.Factory.newInstance();
+        IDataAccessProvider dap = this.dataAccessRepository;
         List<ILogicalPeopleGroupDef> lpgDefs = null;
 
         try {

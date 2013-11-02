@@ -32,21 +32,28 @@ import org.junit.Test;
 
 
 import com.htm.ITaskClientInterface;
-import com.htm.TaskClientInterfaceImpl;
 import com.htm.events.CreateWorkItemEvent;
 import com.htm.events.EventHandler;
 import com.htm.events.IEvent;
 import com.htm.events.IEventSubscriber;
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.query.views.WorkItemView;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-@Ignore
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:META-INF/spring-beans.xml")
+@Transactional
 public class EventSubscriptionTest extends TaskParentInterfaceTest {
 
     private EventSubscriber eventSubscriber;
 
     private EventHandler eventhandler;
 
+    @Autowired
     private ITaskClientInterface taskClient;
 
     @Before
@@ -58,7 +65,7 @@ public class EventSubscriptionTest extends TaskParentInterfaceTest {
         /* Init the event subscriber that is used in the test cases */
         eventSubscriber = new EventSubscriber();
         /* The task client interface is also required in the test cases */
-        taskClient = new TaskClientInterfaceImpl();
+        //taskClient = new TaskClientInterfaceImpl();
     }
 
     @Test
@@ -67,7 +74,7 @@ public class EventSubscriptionTest extends TaskParentInterfaceTest {
         /* Subscribe on the CreateWorkItemEvent */
         eventhandler.subscribe(CreateWorkItemEvent.class, eventSubscriber);
         try {
-            dap.beginTx();
+            dataAccessRepository.beginTx();
 
             /* Create the task instance during creation the work items are created as well,
                 * thus the CreateWorkItem event is sent to all subscribers */
@@ -86,12 +93,12 @@ public class EventSubscriptionTest extends TaskParentInterfaceTest {
             assertEquals(expectedWorkItemViews.size(), events.size());
 
 
-            dap.commitTestCase();
+            dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
     }
 

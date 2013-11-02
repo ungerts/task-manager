@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+         http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
+         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--import resource="classpath:META-INF/cxf/cxf.xml"/-->
+
+    <jdbc:embedded-database id="embedded-datasource" type="H2">
+        <jdbc:script location="classpath:META-INF/drop.sql"/>
+        <jdbc:script location="classpath:META-INF/create2.sql"/>
+        <!--jdbc:script location="classpath:schema.sql"/>
+        <jdbc:script location="classpath:data.sql"/-->
+    </jdbc:embedded-database>
+
+    <!--bean id="dataSourcePsql" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver" />
+        <property name="url" value="jdbc:postgresql://localhost:5432/springtest" />
+        <property name="username" value="ungerts" />
+        <property name="password" value="" />
+    </bean-->
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" />
+        <property name="dataSource" ref="embedded-datasource" />
+        <property name="persistenceUnitName" value="HumanTaskManager" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+                <property name="showSql" value="true"/>
+                <property name="generateDdl" value="true"/>
+                <property name="databasePlatform" value="org.eclipse.persistence.platform.database.H2Platform"/>
+            </bean>
+        </property>
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="eclipselink.weaving">false</prop>
+                <prop key="eclipselink.logging.level.sql">FINE</prop>
+                <prop key="eclipselink.logging.parameters">true</prop>
+                <prop key="eclipselink.logging.logger">ServerLogger</prop>
+                <!--prop key="eclipselink.ddl-generation">drop-and-create-tables</prop>
+                <prop key="eclipselink.ddl-generation.output-mode">both</prop>
+                <prop key="eclipselink.application-location">/Users/ungerts/IdeaProjects/task-manager/</prop>
+                <prop key="eclipselink.create-ddl-jdbc-file-name">create.sql</prop>
+                <prop key="eclipselink.drop-ddl-jdbc-file-name">drop.sql</prop-->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!--jpa:repositories base-package="com.htm.db.spring"/-->
+    <bean id="dataAccessRepository" class="com.htm.db.spring.DataAccessRepositoryImpl" autowire="byName"/>
+    <bean id="taskClientInterface" class="com.htm.TaskClientInterfaceImpl" autowire="byName">
+        <property name="dap" ref="dataAccessRepository"/>
+    </bean>
+    <bean id="taskModelStore" class="com.htm.TaskModelStore" autowire="byName"/>
+    <bean id="iUserManager" class="com.htm.security.UserManagerBasicImpl" autowire="byName"/>
+    <bean id="taskParentInterface" class="com.htm.TaskParentInterfaceImpl" autowire="byName"/>
+    <bean id="taskInstanceFactory" class="com.htm.taskinstance.jpa.TaskInstanceFactoryJPA" autowire="byName" />
+    <bean id="workItemFactory" class="com.htm.taskinstance.jpa.WorkItemFactoryImpl" autowire="byName" />
+    <context:component-scan base-package="com.htm.peopleresolutionprovider"/>
+    <bean id="ilpgResolutionProviderFactory" class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+        <property name="serviceLocatorInterface" value="com.htm.peopleresolution.ILPGResolutionProviderFactory" />
+    </bean>
+
+    <alias name="userByGroup" alias="DEFAULT" />
+
+</beans>

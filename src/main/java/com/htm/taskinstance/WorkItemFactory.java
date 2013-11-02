@@ -24,12 +24,16 @@ import com.htm.dm.EHumanRoles;
 import com.htm.exceptions.DatabaseException;
 import com.htm.exceptions.HumanTaskManagerException;
 import com.htm.taskinstance.jpa.WorkItemFactoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class WorkItemFactory {
 
-    public static WorkItemFactory newInstance() {
-        return new WorkItemFactoryImpl();
-    }
+    @Autowired
+    protected TaskInstanceFactory taskInstanceFactory;
+
+    //public static WorkItemFactory newInstance() {
+    //    return new WorkItemFactoryImpl();
+    //}
 
     /**
      * Creates all work items for the given task instance based TODO

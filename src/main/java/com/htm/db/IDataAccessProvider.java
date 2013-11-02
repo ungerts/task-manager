@@ -39,26 +39,30 @@ public interface IDataAccessProvider {
 
     public final static boolean JUNIT_TEST = true;
 
+    public boolean deleteAllWorkItems() throws DatabaseException;
+
+    public boolean deleteAllTaskInstances() throws DatabaseException;
+
 
     public static class Factory {
 
-        //private static IDataAccessProvider dap = null;
+        //private static IDataAccessProvider dataAccessProvider = null;
 
         public static IDataAccessProvider newInstance() {
 
 //			/* Singleton - Only one instance of the data access provider can be created */
-//			if (dap == null) {
+//			if (dataAccessProvider == null) {
 //				if (JUNIT_TEST) {
 ////					BeanFactory beanFac = new XmlBeanFactory(new FileSystemResource(System.getProperty("user.dir")+"/src/test/resources/services-spring.xml"));
-//					dap = new DataAccessProviderJpaJUnit(); 
+//					dataAccessProvider = new DataAccessProviderJpaJUnit();
 //				} else {
-//					dap = DatabaseAccessProviderJPA.newInstance();
+//					dataAccessProvider = DatabaseAccessProviderJPA.newInstance();
 //				}
 //
 //			}
-//			return dap;
+//			return dataAccessProvider;
             // TODO introduce properties to maintain "lightness"
-            return new JEEDatabaseAccessProvider();
+            return null;
         }
     }
 

@@ -49,8 +49,12 @@ public class WorkItemWrapper extends Observable implements IWorkItem {
 
 
     public IAssignedUser getAssignee() {
-        return TaskInstanceFactory.newInstance().createAssignedUserFromEntity(
-                workItemEntity.getAssigneduser());
+        //return TaskInstanceFactory.newInstance().createAssignedUserFromEntity(
+        //        workItemEntity.getAssigneduser());
+        //return workItemEntity.getAssigneduser();
+        //Assigneduser assignedUserObject = workItemEntity.getAssigneduser();
+        return Utilities.createAssignedUserFromEntity(workItemEntity.getAssigneduser());
+
     }
 
     public Timestamp getCreationTime() {
@@ -143,7 +147,7 @@ public class WorkItemWrapper extends Observable implements IWorkItem {
     }
 
     public ITaskInstance getTaskInstance() {
-        return TaskInstanceFactory.newInstance().createTaskInstanceFromEntity(
+        return Utilities.createTaskInstanceFromEntity(
                 workItemEntity.getHumantaskinstance());
     }
 

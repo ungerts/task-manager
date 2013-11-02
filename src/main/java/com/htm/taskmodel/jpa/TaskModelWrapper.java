@@ -361,7 +361,7 @@ public class TaskModelWrapper implements ITaskModel {
             while (iter.hasNext()) {
                 /* Create the model of the human task instance and add it to the list of
                      * instance models */
-                taskInstances.add(TaskInstanceFactory.newInstance().createTaskInstanceFromEntity(
+                taskInstances.add(Utilities.createTaskInstanceFromEntity(
                         iter.next()));
             }
 

@@ -36,28 +36,31 @@ import com.htm.taskinstance.TaskInstanceFactory;
 import com.htm.taskmodel.ModelElementFactory;
 import com.htm.taskparent.TaskParentConnectorDummy;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class TaskInstanceDummyProvider extends TaskModelDummyProvider {
 
     public static final String TASK_INSTANCE_DUMMY_NAME1 = "taskInstance1";
 
-    public static final String TASK_INITIATOR_USER_ID = UserManagerBasicImpl.DUMMY_ADMIN_USERNAME;
+    public static final String TASK_INITIATOR_USER_ID = "admin";
 
-    public static final String TASK_INITIATOR_PASSWORD = UserManagerBasicImpl.DUMMY_ADMIN_PASSWORD;
+    public static final String TASK_INITIATOR_PASSWORD = "admin";
 
+    @Autowired
+    protected TaskParentInterface taskParentInterface;
 
     public void deleteTaskInstanceDummy(String name) throws DatabaseException {
         try {
             /* Create transaction boundaries */
-            dap.beginTx();
-            dap.deleteHumanTaskInstance(TASK_INSTANCE_DUMMY_NAME1);
-            dap.commitTestCase();
+            dataAccessRepository.beginTx();
+            dataAccessRepository.deleteHumanTaskInstance(TASK_INSTANCE_DUMMY_NAME1);
+            dataAccessRepository.commitTx();
 
         } catch (DatabaseException e) {
-            dap.rollbackTx();
+            dataAccessRepository.rollbackTx();
             throw e;
         } finally {
-            dap.closeTestCase();
+            dataAccessRepository.close();
         }
 
     }
@@ -70,7 +73,7 @@ public abstract class TaskInstanceDummyProvider extends TaskModelDummyProvider {
     protected String createTaskInstanceDummy(Timestamp expirationTime) throws HumanTaskManagerException {
         initSecurityContext(TASK_INITIATOR_USER_ID, TASK_INITIATOR_PASSWORD);
 
-        TaskParentInterface partenInterface = new TaskParentInterfaceImpl();
+        TaskParentInterface partenInterface = this.taskParentInterface;
 
         return partenInterface.createTaskInstance(TaskParentConnectorDummy.TASK_PARENT_ID,
                 getCorrelationPropertyDummies(),
@@ -115,25 +118,25 @@ public abstract class TaskInstanceDummyProvider extends TaskModelDummyProvider {
 
     protected Set<IAttachment> getAttachmentDummies() throws DatabaseException {
         Set<IAttachment> attachments = new HashSet<IAttachment>();
-
-        IAttachment attachment = TaskInstanceFactory.newInstance().createAttachment("Attachment1");
+        
+        IAttachment attachment = this.taskInstanceFactory.createAttachment("Attachment1");
         /* Add first attachment. It contains a simple String*/
         attachment.setAccessType(IAttachment.ACCESS_TYPE_INLINE);
         attachment.setContentType("Good old String");
         attachment.setContent(Utilities.getBLOBFromString("Test content for " + attachment.getName()));
         attachment.setAttachedAt(new Timestamp(Long.valueOf("1250045365812")));// Arbitrary time
-        //	attachment.setAttachedBy(TaskInstanceFactory.newInstance().createAssignedUser(TASK_INITIATOR));
+        //	attachment.setAttachedBy(this.taskInstanceFactory.createAssignedUser(TASK_INITIATOR));
 
         attachments.add(attachment);
 
         /* Add second attachment. It accesses an imaginary resource via an URL (i.e. by reference)  */
-        attachment = TaskInstanceFactory.newInstance().createAttachment("Attachment2");
-        //	attachment.setAttachedBy(TaskInstanceFactory.newInstance().createAssignedUser(TASK_INITIATOR));
+        attachment = this.taskInstanceFactory.createAttachment("Attachment2");
+        //	attachment.setAttachedBy(this.taskInstanceFactory.createAssignedUser(TASK_INITIATOR));
         attachment.setAccessType(IAttachment.ACCESS_TYPE_REFERENCE);
         attachment.setContentType("URL");
         attachment.setContent(Utilities.getBLOBFromString("http://htm." + attachment.getName() + ".com"));
         attachment.setAttachedAt(new Timestamp(Long.valueOf("1250045363814")));// Arbitrary time
-        //attachment.setAttachedBy(TaskInstanceFactory.newInstance().createAssignedUser(TASK_INITIATOR));
+        //attachment.setAttachedBy(this.taskInstanceFactory.createAssignedUser(TASK_INITIATOR));
 
         attachments.add(attachment);
 
@@ -144,14 +147,14 @@ public abstract class TaskInstanceDummyProvider extends TaskModelDummyProvider {
         Set<ICorrelationProperty> corProperties = new HashSet<ICorrelationProperty>();
 
         /* Create first correlation property */
-        ICorrelationProperty corProperty = TaskInstanceFactory.newInstance()
+        ICorrelationProperty corProperty = this.taskInstanceFactory
                 .createCorrelationProperty("CorrelationProperty1");
         corProperty.setValue(Utilities.getXMLFromString("<value>"
                 + corProperty.getName() + "</value>"));
         corProperties.add(corProperty);
 
         /* Create second correlation property */
-        corProperty = TaskInstanceFactory.newInstance()
+        corProperty = this.taskInstanceFactory
                 .createCorrelationProperty("CorrelationProperty2");
         corProperty.setValue(Utilities.getXMLFromString("<value>"
                 + corProperty.getName() + "</value>"));
@@ -163,22 +166,22 @@ public abstract class TaskInstanceDummyProvider extends TaskModelDummyProvider {
 
     @Override
     protected IQuery getCompleteByQuery() {
-        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/humanTask/infos/completeBy");
+        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/infos/completeBy");
     }
 
     @Override
     protected IQuery getPriorityQuery() {
-        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/humanTask/infos/priority");
+        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/infos/priority");
     }
 
     @Override
     protected IQuery getSkipableQuery() {
-        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/humanTask/infos/skipable");
+        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/infos/skipable");
     }
 
     @Override
     protected IQuery getStartByQuery() {
-        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/humanTask/infos/startBy");
+        return ModelElementFactory.newInstance().createQuery("/taskParentContext/properties/infos/startBy");
     }
 
 

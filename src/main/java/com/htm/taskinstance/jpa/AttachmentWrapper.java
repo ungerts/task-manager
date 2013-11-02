@@ -29,6 +29,7 @@ import com.htm.entities.jpa.Attachment;
 import com.htm.taskinstance.IAssignedUser;
 import com.htm.taskinstance.IAttachment;
 import com.htm.taskinstance.TaskInstanceFactory;
+import com.htm.utils.Utilities;
 
 public class AttachmentWrapper implements IAttachment, Serializable {
 
@@ -103,7 +104,7 @@ public class AttachmentWrapper implements IAttachment, Serializable {
     }
 
     public IAssignedUser getAttachedBy() {
-        return TaskInstanceFactory.newInstance().createAssignedUserFromEntity(attachmentEntity.getAssigneduser());
+        return Utilities.createAssignedUserFromEntity(attachmentEntity.getAssigneduser());
     }
 
     public void setAttachedAt(Timestamp attachedAt) {

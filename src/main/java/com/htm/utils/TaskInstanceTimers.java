@@ -148,10 +148,10 @@ public class TaskInstanceTimers {
     public static void reactivateTimers() {
         log.debug("reactivateTimers - Sorry, timers are currently deactivated.");
 //		try {
-//			dap.beginTx();
+//			dataAccessProvider.beginTx();
 //			/* Get all task instance from the database which are not in a final state yet */
 //			List<ITaskInstance> nonFinalizedTaskInstances = 
-//				dap.getNonFinalizedTaskInstances();
+//				dataAccessProvider.getNonFinalizedTaskInstances();
 //			
 //			/* Check for all non finalized task instances if they either have an 
 //			 * expiration time or a suspend until time set (or both) and instantiate 
@@ -165,12 +165,12 @@ public class TaskInstanceTimers {
 //				activateSuspendUntilTimer(taskInstance);
 //			}
 //			
-//			dap.commitTx();
+//			dataAccessProvider.commitTx();
 //		} catch (HumanTaskManagerException e) {
-//			dap.rollbackTx();
+//			dataAccessProvider.rollbackTx();
 //			throw new RuntimeException(e);
 //		} finally {
-//			dap.close();
+//			dataAccessProvider.close();
 //		}
     }
 

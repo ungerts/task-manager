@@ -58,6 +58,8 @@ import com.htm.taskparent.ITaskParentConnector;
 import com.htm.utils.SessionUtils;
 import com.htm.utils.TaskInstanceTimers;
 import com.htm.utils.Utilities;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The implementation of the task client interface.
@@ -65,6 +67,7 @@ import com.htm.utils.Utilities;
  * @author Sebastian Wagner
  * @author Tobias Unger
  */
+@Transactional
 public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
     /**
@@ -79,6 +82,12 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
      */
     private Logger log;
 
+    @Autowired
+    private TaskInstanceFactory taskInstanceFactory;
+
+    @Autowired
+    private WorkItemFactory workItemFactory;
+
     /**
      * Creates a new {@link TaskClientInterfaceImpl} object.</b> It initializes
      * the {@link IDataAccessProvider} and the logger.</b> Moreover all timers
@@ -86,7 +95,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
      * {@link TaskInstanceTimers} for more information.
      */
     public TaskClientInterfaceImpl() {
-        this.dap = IDataAccessProvider.Factory.newInstance();
+        //this.dataAccessProvider = IDataAccessProvider.Factory.newInstance();
         this.log = Utilities.getLogger(this.getClass());
         this.evenHandler = EventHandler.newInstance();
 
@@ -1276,13 +1285,13 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
                 * i.e. if she is already assigned to a task via a work item having
                 * the role potential owner. If not add her to the list.
                 */
-            IAssignedUser assignedUser = TaskInstanceFactory.newInstance()
+            IAssignedUser assignedUser = this.taskInstanceFactory
                     .createAssignedUser(forwardeeId);
             IWorkItem potentialOwnerWI = dap.getWorkItem(tiid, assignedUser,
                     EHumanRoles.POTENTIAL_OWNER);
             if (potentialOwnerWI == null) {
                 /* Add the forwardee to the list of potential owners */
-                WorkItemFactory workItemFac = WorkItemFactory.newInstance();
+                WorkItemFactory workItemFac = this.workItemFactory;
                 potentialOwnerWI = workItemFac.createNewWorkItem(forwardeeId,
                         EHumanRoles.POTENTIAL_OWNER, taskInstance);
                 dap.persistWorkItem(potentialOwnerWI);
@@ -1421,4 +1430,11 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
 
     }
 
+    public IDataAccessProvider getDap() {
+        return dap;
+    }
+
+    public void setDap(IDataAccessProvider dap) {
+        this.dap = dap;
+    }
 }

@@ -39,12 +39,16 @@ import com.shtm.StructuredTaskClientInterfaceImpl;
 import com.shtm.exceptions.SHTMException;
 import com.shtm.operationAndStates.EStates;
 import com.shtm.structureClasses.ResultStructure;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Ignore
 public class StructureTestClass {
     String credentials;
     IStructuredTaskClientInterface strTaskClient;
     StructureDataTestUtilities testUt;
+
+    @Autowired
+    private TaskInstanceFactory taskInstanceFactory;
 
     @Before
     public void init() {
@@ -60,13 +64,13 @@ public class StructureTestClass {
 
             strTaskClient = new StructuredTaskClientInterfaceImpl();
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
 
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
 
     }
@@ -110,12 +114,12 @@ public class StructureTestClass {
             t1.removeSubTask(st2);
             strTaskClient.printStructureInfos(tiid1, true);
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -166,12 +170,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(mtid1, true);
             assertTrue(t1.verifyStructure(mtid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -237,12 +241,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(mtid1, true);
             assertTrue(t1.verifyStructure(mtid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -320,12 +324,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(mtid1, true);
             assertTrue(t1.verifyStructure(mtid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -368,12 +372,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(tiid1, true);
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -433,12 +437,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(miid1, true);
             assertTrue(t1.verifyStructure(miid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -502,12 +506,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(miid1, true);
             assertTrue(t1.verifyStructure(miid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -585,12 +589,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(miid1, true);
             assertTrue(t1.verifyStructure(miid1, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -626,12 +630,12 @@ public class StructureTestClass {
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
             assertTrue(t1.verifyStructure(tiid2, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -677,12 +681,12 @@ public class StructureTestClass {
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -732,12 +736,12 @@ public class StructureTestClass {
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -790,12 +794,12 @@ public class StructureTestClass {
             assertTrue(t1.verifyStructure(tiid1, strTaskClient));
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -843,12 +847,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -901,12 +905,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -962,12 +966,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1025,12 +1029,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1092,12 +1096,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1160,12 +1164,12 @@ public class StructureTestClass {
             assertTrue(m2.verifyStructure(miid2, strTaskClient));
             assertTrue(m3.verifyStructure(miid3, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1233,12 +1237,12 @@ public class StructureTestClass {
             assertTrue(m1.verifyStructure(tiid1, strTaskClient));
             assertTrue(m2.verifyStructure(tiid2, strTaskClient));
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1298,12 +1302,12 @@ public class StructureTestClass {
             strTaskClient.printStructureInfos(tiid2, true);
             strTaskClient.printStructureInfos(tiid3, true);
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1347,12 +1351,12 @@ public class StructureTestClass {
             System.out.println(strTaskClient.getFault(mtid1).getName());
             System.out.println(strTaskClient.getFault(mtid1).getData());
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1395,19 +1399,19 @@ public class StructureTestClass {
             System.out.println(strTaskClient.getFault(tiid1).getName());
             System.out.println(strTaskClient.getFault(tiid1).getData());
 
-            testUt.dap.commitTestCase();
+            testUt.dap.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
     @Test
     public void mergeTwoSubStuctures() {
         try {
-            // testUt.dap.beginTx();
+            // testUt.dataAccessRepository.beginTx();
             Map<String, TestStructureData> ControllDatas = new HashMap<String, TestStructureData>();
 
             String tiid1 = testUt.createTaskInstanceDummy();
@@ -1438,12 +1442,12 @@ public class StructureTestClass {
             // performOperationsOnStructure(mtid1, tiid1, null, ControllDatas);
             testUt.controllallTestData(ControllDatas);
 
-            // testUt.dap.commitTestCase();
+            // testUt.dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
             testUt.dap.rollbackTx();
             e.printStackTrace();
         } finally {
-            testUt.dap.closeTestCase();
+            testUt.dap.close();
         }
     }
 
@@ -1714,7 +1718,7 @@ public class StructureTestClass {
         String attachment1ContentType = "String";
         byte[] attachment1Content = Utilities
                 .getBLOBFromString("Test content for junit attachment1");
-        IAttachment attachment1 = TaskInstanceFactory.newInstance()
+        IAttachment attachment1 = this.taskInstanceFactory
                 .createAttachment(attachment1Name);
         attachment1.setAccessType(attachment1AccessType);
         attachment1.setContentType(attachment1ContentType);
@@ -1729,7 +1733,7 @@ public class StructureTestClass {
                 .get(0).getName());
 
         String attachment2Name = "myAttachment2";
-        IAttachment attachment2 = TaskInstanceFactory.newInstance()
+        IAttachment attachment2 = this.taskInstanceFactory
                 .createAttachment(attachment2Name);
         attachment2.setAccessType(attachment1AccessType);
         attachment2.setContentType(attachment1ContentType);
@@ -1784,7 +1788,7 @@ public class StructureTestClass {
         String attachment1ContentType = "String";
         byte[] attachment1Content = Utilities
                 .getBLOBFromString("Test content for junit attachment1");
-        IAttachment attachment1 = TaskInstanceFactory.newInstance()
+        IAttachment attachment1 = this.taskInstanceFactory
                 .createAttachment(attachment1Name);
         attachment1.setAccessType(attachment1AccessType);
         attachment1.setContentType(attachment1ContentType);

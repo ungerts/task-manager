@@ -20,14 +20,14 @@ package com.htm.taskinstance;
 
 import java.util.Map;
 
-import org.jdom2.Document;
+import org.w3c.dom.Document;
 
 import com.htm.query.IQueryContext;
 
 
 public interface ITaskParentContext extends IQueryContext {
 
-    public Map<String, Document> getProperties();
+    public Document getProperties();
 
 
 }

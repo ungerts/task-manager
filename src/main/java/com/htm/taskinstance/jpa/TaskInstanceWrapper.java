@@ -60,7 +60,7 @@ public class TaskInstanceWrapper implements ITaskInstance {
     protected Humantaskinstance taskInstanceEntity;
 
     protected Logger log = Utilities.getLogger(this.getClass());
-    ;
+
 
     public TaskInstanceWrapper(Humantaskinstance taskInstanceEntity) {
         this.taskInstanceEntity = taskInstanceEntity;
@@ -278,7 +278,7 @@ public class TaskInstanceWrapper implements ITaskInstance {
         Iterator<Attachment> iter = attachmentEntities.iterator();
 
         while (iter.hasNext()) {
-            IAttachment attachmentModel = TaskInstanceFactory.newInstance()
+            IAttachment attachmentModel = Utilities
                     .createAttachmentFromEntity((Attachment) iter.next());
             attachmentModels.add(attachmentModel);
         }
@@ -311,7 +311,7 @@ public class TaskInstanceWrapper implements ITaskInstance {
                     correlationProperties.put(
                             correlationPropertyName,
                             /* Determine the model of the correlation property */
-                            TaskInstanceFactory.newInstance()
+                            Utilities
                                     .createCorrelationPropertyFromEntity(
                                             correlationProperty));
                 }
@@ -341,7 +341,7 @@ public class TaskInstanceWrapper implements ITaskInstance {
             return null;
         }
 
-        return TaskInstanceFactory.newInstance().createFault(faultName,
+        return Utilities.createFault(faultName,
                 faultData);
     }
 
@@ -651,7 +651,7 @@ public class TaskInstanceWrapper implements ITaskInstance {
                 * which have the appropriate role.
                 */
             while (iter.hasNext()) {
-                IWorkItem workItem = WorkItemFactory.newInstance()
+                IWorkItem workItem = Utilities
                         .createWorkItemFromEntity((Workitem) iter.next());
                 log.debug("Get users by role '" + role + "' - "
                         + "Work item with id '" + workItem.getId()
@@ -820,8 +820,8 @@ public class TaskInstanceWrapper implements ITaskInstance {
                      * Create the model of the work items and add it to the list of
                      * instance models
                      */
-                taskInstances.add(WorkItemFactory.newInstance()
-                        .createWorkItemFromEntity(iter.next()));
+                Utilities
+                        .createWorkItemFromEntity(iter.next());
             }
 
         }
