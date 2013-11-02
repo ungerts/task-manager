@@ -35,10 +35,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.htm.ITaskClientInterface;
-import com.htm.TaskClientInterfaceImpl;
+
 import com.htm.TaskParentInterface;
-import com.htm.TaskParentInterfaceImpl;
 import com.htm.dm.EHumanRoles;
 import com.htm.exceptions.AuthorizationException;
 import com.htm.exceptions.HumanTaskManagerException;
@@ -50,11 +48,11 @@ import com.htm.taskinstance.ETaskInstanceState;
 import com.htm.taskinstance.IAttachment;
 import com.htm.taskinstance.IFault;
 import com.htm.taskinstance.ITaskInstance;
-import com.htm.taskinstance.TaskInstanceFactory;
 import com.htm.taskparent.TaskParentConnectorDummy;
 import com.htm.taskparent.DummyCallbackHandler.TaskParentCallbackResponseContainer;
 import com.htm.utils.Utilities;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,10 +60,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:META-INF/spring-beans.xml")
 @Transactional
-@Ignore
 public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
-    protected ITaskClientInterface taskClient = null;
+    //@Autowired
+    //protected ITaskClientInterface TaskClientInterface;
 
     protected IUserManager um = getUserManager();
 
@@ -76,7 +74,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
         /* Create test task models, logical people groups, user etc. */
 
         /* Init task client interface */
-        taskClient = new TaskClientInterfaceImpl();
+        //TaskClientInterface = new TaskClientInterfaceImpl();
     }
 
     @Test
@@ -155,7 +153,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
     }
 
-//	@Test  
+//	@Test
 //	public void startOperation4Ever() throws HumanTaskManagerException {
 //		for (int i = 0; i < 1000; i++) {
 //			System.out.println(i);
@@ -173,8 +171,8 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Before starting the execution of a task instance it has to be claimed */
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
 
             ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             assertEquals(ETaskInstanceState.IN_PROGRESS, taskInstance.getStatus());
@@ -199,7 +197,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* AuthorizationException expected */
-            taskClient.start(tiid);
+            this.taskClientInterface.start(tiid);
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -221,9 +219,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Before starting the execution of a task instance it has to be claimed and started */
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.stop(tiid);
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.stop(tiid);
 
             ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             assertEquals(ETaskInstanceState.RESERVED, taskInstance.getStatus());
@@ -248,9 +246,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Before starting the execution of a task instance it has to be claimed and started */
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
             /* IllegalArgumentException expected */
-            taskClient.stop(tiid);
+            this.taskClientInterface.stop(tiid);
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -272,9 +270,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Before completing a task instance it has to be claimed and started */
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.complete(tiid, getOutputDataDummy());
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.complete(tiid, getOutputDataDummy());
 
             ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             /* Check if the expected attributes in the task instance were set */
@@ -309,9 +307,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Before completing a task instance it has to be claimed and started */
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.complete(tiid, null);
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.complete(tiid, null);
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
             dataAccessRepository.rollbackTx();
@@ -330,10 +328,10 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
             /* Before completing a task instance it has to be claimed and started */
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
 
             /* InvalidArgumentException expected since task instance is not in state IN_PROGRESS */
-            taskClient.complete(tiid, getOutputDataDummy());
+            this.taskClientInterface.complete(tiid, getOutputDataDummy());
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -356,9 +354,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             initSecurityContext(userId, USER_PASSWORD);
             /* A task instance must be in the state in progress to fail thus
                 * it has to be claimed and started before*/
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.fail(tiid, expectedFaultName, getFaultDataDummy());
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.fail(tiid, expectedFaultName, getFaultDataDummy());
 
             ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
             /* Check if the expected attributes in the task instance were set */
@@ -394,11 +392,11 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String userId = getExpectedPotentialOwners()[0];
             String expectedFaultName = "MyFault";
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
 
             /* An exception is expected if a fault is raised if the
                 * task isn't in state 'In Progress' */
-            taskClient.fail(tiid, expectedFaultName, getFaultDataDummy());
+            this.taskClientInterface.fail(tiid, expectedFaultName, getFaultDataDummy());
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -417,11 +415,11 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String userId = getExpectedPotentialOwners()[0];
             String expectedFaultName = "MyFault";
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
 
             /* InvalidArgumentException expected since fault message is null */
-            taskClient.fail(tiid, expectedFaultName, null);
+            this.taskClientInterface.fail(tiid, expectedFaultName, null);
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -439,10 +437,10 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
 
             /* InvalidArgumentException expected since fault name is null */
-            taskClient.fail(tiid, null, getFaultDataDummy());
+            this.taskClientInterface.fail(tiid, null, getFaultDataDummy());
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -473,7 +471,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * 2. Suspend a task instance which
                 * was claimed i.e. in state RESERVED
                 */
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
             testSuspendOperation(tiid, ETaskInstanceState.SUSPENDED_RESERVED);
             /* Resume task instance */
             testResumeOperation(tiid, ETaskInstanceState.RESERVED);
@@ -482,7 +480,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
                 * 3. Suspend a task instance which
                 * was started i.e. in state IN_PROGRESS
                 */
-            taskClient.start(tiid);
+            this.taskClientInterface.start(tiid);
             testSuspendOperation(tiid, ETaskInstanceState.SUSPENDED_IN_PROGRESS);
             /* Resume task instance */
             testResumeOperation(tiid, ETaskInstanceState.IN_PROGRESS);
@@ -508,9 +506,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String tiid = createTaskInstanceDummy();
             String userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.complete(tiid, getOutputDataDummy());
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.complete(tiid, getOutputDataDummy());
             /* Completed task instance can't  be suspended -> Exception expected */
             testSuspendOperation(tiid, ETaskInstanceState.SUSPENDED_IN_PROGRESS);
             dataAccessRepository.commitTx();
@@ -567,7 +565,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             tiid = createTaskInstanceDummy();
             userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
             testSkipOperation(tiid);
 
             dataAccessRepository.commitTx();
@@ -587,9 +585,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String userId = getExpectedPotentialOwners()[0];
 
             initSecurityContext(userId, USER_PASSWORD);
-            taskClient.claim(tiid);
-            taskClient.start(tiid);
-            taskClient.complete(tiid, getOutputDataDummy());
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.start(tiid);
+            this.taskClientInterface.complete(tiid, getOutputDataDummy());
             /* Exception is expected since task client is already completed */
             testSkipOperation(tiid);
 
@@ -648,6 +646,8 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     }
 
     @Test
+    @Ignore
+    //TODO: Reimplement timers based on Spring!
     public void suspendUntilOperation() throws HumanTaskManagerException, InterruptedException {
 
         try {
@@ -660,10 +660,10 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             /* The task is suspended for 5 seconds */
             long duration = (long) 5000;
             Timestamp suspendUntilTime = new Timestamp(Utilities.getCurrentTime().getTime() + duration);
-            taskClient.suspendUntil(tiid, suspendUntilTime);
+            this.taskClientInterface.suspendUntil(tiid, suspendUntilTime);
 
             /* Check if the task instance is suspended. */
-            TaskInstanceView taskInstance = taskClient.getTaskInfo(tiid);
+            TaskInstanceView taskInstance = this.taskClientInterface.getTaskInfo(tiid);
             assertEquals(ETaskInstanceState.SUSPENDED_READY.toString(),
                     taskInstance.getStatus());
             assertTrue(taskInstance.isSuspended());
@@ -672,7 +672,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             Thread.sleep(duration + 3000);
             /* The task instance view is detached i.e. means that it doesn't get
                 * refreshed automatically. I new instance has to be fetched. */
-            taskInstance = taskClient.getTaskInfo(tiid);
+            taskInstance = this.taskClientInterface.getTaskInfo(tiid);
             assertEquals(ETaskInstanceState.READY.toString(), taskInstance.getStatus());
             assertTrue(!taskInstance.isSuspended());
 
@@ -699,9 +699,9 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             Timestamp suspendUntilTime = new Timestamp(Utilities.getCurrentTime().getTime() + duration);
             /* Suspend the task instance and then try to suspend it again. An
                 * exception is expected */
-            taskClient.suspendUntil(tiid, suspendUntilTime);
+            this.taskClientInterface.suspendUntil(tiid, suspendUntilTime);
             /* Suspend again */
-            taskClient.suspendUntil(tiid, suspendUntilTime);
+            this.taskClientInterface.suspendUntil(tiid, suspendUntilTime);
 
             dataAccessRepository.commitTx();
         } catch (HumanTaskManagerException e) {
@@ -730,7 +730,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String attachment2AccessType = IAttachment.ACCESS_TYPE_REFERENCE;
             String attachment2ContentType = "URL";
             byte[] attachment2Content = Utilities.getBLOBFromString("http://www.htm.junit.attachment2.com");
-            
+
             IAttachment attachment1 =
                     this.taskInstanceFactory.createAttachment(attachment1Name);
             attachment1.setAccessType(attachment1AccessType);
@@ -745,14 +745,14 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             long timeBeforeAddingAttachments = Utilities.getCurrentTime().getTime();
             /* Add the attachments. Task instance has to be claimed before */
-            taskClient.claim(tiid);
-            taskClient.addAttachment(tiid, attachment1);
-            taskClient.addAttachment(tiid, attachment2);
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.addAttachment(tiid, attachment1);
+            this.taskClientInterface.addAttachment(tiid, attachment2);
 
             long timeAfterAddingAttachments = Utilities.getCurrentTime().getTime();
 
             /* Get the attachment 1 */
-            List<IAttachment> attachments = taskClient.getAttachments(tiid, attachment1Name);
+            List<IAttachment> attachments = this.taskClientInterface.getAttachments(tiid, attachment1Name);
 
             /* Only one attachment with that name expected */
             assertEquals(1, attachments.size());
@@ -772,7 +772,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             assertEquals(userId, attachment1.getAttachedBy().getUserId());
 
             /* Get the attachment 2 */
-            attachments = taskClient.getAttachments(tiid, attachment2Name);
+            attachments = this.taskClientInterface.getAttachments(tiid, attachment2Name);
 
             /* Only one attachment with that name expected */
             assertEquals(1, attachments.size());
@@ -829,12 +829,12 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             attachment.setContent(attachmentContent);
 
             /* Add attachment. */
-            taskClient.addAttachment(tiid, attachment);
+            this.taskClientInterface.addAttachment(tiid, attachment);
             /* Delete these attachment */
-            taskClient.deleteAttachments(tiid, attachmentName);
+            this.taskClientInterface.deleteAttachments(tiid, attachmentName);
 
             /* Check if they were really deleted */
-            List<IAttachment> attachments = taskClient.getAttachments(tiid, attachmentName);
+            List<IAttachment> attachments = this.taskClientInterface.getAttachments(tiid, attachmentName);
             assertEquals(0, attachments.size());
 
             dataAccessRepository.commitTx();
@@ -856,8 +856,8 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             IFault expectedFault = this.taskInstanceFactory.createFault("myFault", getFaultDataDummy());
             /* Task has to be claimed because only actual owners can set fault data */
-            taskClient.claim(tiid);
-            taskClient.setFault(tiid,
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.setFault(tiid,
                     expectedFault.getName(), expectedFault.getData());
 
             /* Get fault from database and check if values are correct
@@ -865,7 +865,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             userId = getExpectedPotentialOwners()[0];
             initSecurityContext(userId, USER_PASSWORD);
 
-            IFault resultFault = taskClient.getFault(tiid);
+            IFault resultFault = this.taskClientInterface.getFault(tiid);
             assertEquals(expectedFault.getName(), resultFault.getName());
             assertEquals((String) expectedFault.getData(), (String) resultFault.getData());
             dataAccessRepository.commitTx();
@@ -887,19 +887,19 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             IFault expectedFault = this.taskInstanceFactory.createFault("myFault", getFaultDataDummy());
             /* Task has to be claimed because only actual owners can set fault data */
-            taskClient.claim(tiid);
-            taskClient.setFault(tiid,
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.setFault(tiid,
                     expectedFault.getName(), expectedFault.getData());
 
             /* Check if the fault was successfully stored */
-            IFault resultFault = taskClient.getFault(tiid);
+            IFault resultFault = this.taskClientInterface.getFault(tiid);
             assertNotNull(resultFault);
 
             /* Delete the fault */
-            taskClient.deleteFault(tiid);
+            this.taskClientInterface.deleteFault(tiid);
 
 
-            resultFault = taskClient.getFault(tiid);
+            resultFault = this.taskClientInterface.getFault(tiid);
             assertNull(resultFault);
             dataAccessRepository.commitTx();
 
@@ -920,16 +920,16 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             initSecurityContext(userId, USER_PASSWORD);
 
             /* Task has to be claimed because only actual owners can set output data */
-            taskClient.claim(tiid);
-            taskClient.setOutput(tiid, getOutputDataDummy2());
+            this.taskClientInterface.claim(tiid);
+            this.taskClientInterface.setOutput(tiid, getOutputDataDummy2());
 
             /* Check if the output was successfully stored */
             assertEquals(getOutputDataDummy2(),
-                    taskClient.getOutput(tiid));
+                    this.taskClientInterface.getOutput(tiid));
 
             /* Delete the output thus the output should be null */
-            taskClient.deleteOutput(tiid);
-            assertNull(taskClient.getOutput(tiid));
+            this.taskClientInterface.deleteOutput(tiid);
+            assertNull(this.taskClientInterface.getOutput(tiid));
 
             dataAccessRepository.commitTx();
 
@@ -952,7 +952,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             /* Check if returned input is correct, i.e. it has to be checked
                 * if the input dummies are equal */
-            assertTrue(getInputDataDummy().equals((Map<String, String>) taskClient.getInput(tiid)));
+            assertTrue(getInputDataDummy().equals((Map<String, String>) this.taskClientInterface.getInput(tiid)));
 
             dataAccessRepository.commitTx();
 
@@ -973,7 +973,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             initSecurityContext(userId, USER_PASSWORD);
 
             /* Check if returned input is correct */
-            String description = taskClient.getTaskDescription(tiid);
+            String description = this.taskClientInterface.getTaskDescription(tiid);
             assertEquals(PRESENTATION_DESC, description);
 
             dataAccessRepository.commitTx();
@@ -997,20 +997,20 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
             String tiid1 = createTaskInstanceDummy();
             String userId1 = getExpectedPotentialOwners()[0];
             initSecurityContext(userId1, USER_PASSWORD);
-            taskClient.claim(tiid1);
+            this.taskClientInterface.claim(tiid1);
 
             String tiid2 = createTaskInstanceDummy();
             String userId2 = getExpectedPotentialOwners()[0];
             initSecurityContext(userId2, USER_PASSWORD);
-            taskClient.claim(tiid2);
+            this.taskClientInterface.claim(tiid2);
 
             String tiid3 = createTaskInstanceDummy();
             String userId3 = getExpectedPotentialOwners()[1];
             initSecurityContext(userId3, USER_PASSWORD);
-            taskClient.claim(tiid3);
+            this.taskClientInterface.claim(tiid3);
 
             /* Get all work items that are claimed by a certain user */
-            List<WorkItemView> workItemViews = taskClient.query(
+            List<WorkItemView> workItemViews = this.taskClientInterface.query(
                     "GENERICHUMANROLE='" + EHumanRoles.POTENTIAL_OWNER.toString() + "' AND ASSIGNEE='"
                             + userId1 + "' AND ISCLAIMED=1");
 
@@ -1040,6 +1040,8 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     }
 
     @Test(expected = InvalidOperationException.class)
+    @Ignore
+    //TODO: Reimplement timers based on Spring!
     public void claimExpiredTask() throws InterruptedException, HumanTaskManagerException {
         try {
             dataAccessRepository.beginTx();
@@ -1059,7 +1061,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
             initSecurityContext(userId, USER_PASSWORD);
             /* Try to claim a task instance that is expired */
-            taskClient.claim(tiid);
+            this.taskClientInterface.claim(tiid);
 
             dataAccessRepository.commitTx();
 
@@ -1091,7 +1093,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
 
 
     protected void testSuspendOperation(String tiid, ETaskInstanceState suspendState) throws HumanTaskManagerException {
-        taskClient.suspend(tiid);
+        this.taskClientInterface.suspend(tiid);
         ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(suspendState, taskInstance.getStatus());
@@ -1099,14 +1101,14 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     }
 
     protected void testSkipOperation(String tiid) throws HumanTaskManagerException {
-        taskClient.skip(tiid);
+        this.taskClientInterface.skip(tiid);
         ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(ETaskInstanceState.OBSOLETE, taskInstance.getStatus());
     }
 
     protected void testResumeOperation(String tiid, ETaskInstanceState nonSuspendedState) throws HumanTaskManagerException {
-        taskClient.resume(tiid);
+        this.taskClientInterface.resume(tiid);
         ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
 
         assertEquals(nonSuspendedState, taskInstance.getStatus());
@@ -1116,7 +1118,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     protected void testClaimOperation(String tiid, String userId, String password) throws HumanTaskManagerException {
 
         initSecurityContext(userId, password);
-        taskClient.claim(tiid);
+        this.taskClientInterface.claim(tiid);
 
         ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
         assertEquals(ETaskInstanceState.RESERVED.toString(), taskInstance.getStatus().toString());
@@ -1130,7 +1132,7 @@ public class TaskClientInterfaceTest extends TaskParentInterfaceTest {
     protected void testReleaseOperation(String tiid, String userId, String password) throws HumanTaskManagerException {
         initSecurityContext(userId, password);
 
-        taskClient.release(tiid);
+        this.taskClientInterface.release(tiid);
 
         ITaskInstance taskInstance = dataAccessRepository.getTaskInstance(tiid);
         assertEquals(ETaskInstanceState.READY.toString(), taskInstance.getStatus().toString());

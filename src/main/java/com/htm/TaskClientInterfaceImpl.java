@@ -264,6 +264,7 @@ public class TaskClientInterfaceImpl implements ITaskClientInterface {
       */
     public void addAttachment(String tiid, IAttachment attachment)
             throws HumanTaskManagerException {
+        log.debug("Add attachment to task '" + tiid + "'.");
         try {
             /* Start transaction */
             dataAccessProvider.beginTx();

@@ -65,7 +65,7 @@ public class EventSubscriptionTest extends TaskParentInterfaceTest {
         /* Init the event subscriber that is used in the test cases */
         eventSubscriber = new EventSubscriber();
         /* The task client interface is also required in the test cases */
-        //taskClient = new TaskClientInterfaceImpl();
+        //TaskClientInterface = new TaskClientInterfaceImpl();
     }
 
     @Test
